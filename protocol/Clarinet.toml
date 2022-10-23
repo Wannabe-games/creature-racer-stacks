@@ -22,6 +22,9 @@ path = "contracts/creature-racer-referral-nft.clar"
 [contracts.creature-racer-referral-pool]
 path = "contracts/creature-racer-referral-pool.clar"
 
+[contracts.creature-racer-staking]
+path = "contracts/creature-racer-staking.clar"
+
 [repl]
 costs_version = 2
 parser_version = 2
