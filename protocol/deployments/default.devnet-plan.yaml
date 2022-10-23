@@ -18,6 +18,6 @@ plan:
         - contract-publish:
             contract-name: creature-racer-referral-nft
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            cost: 19870
+            cost: 26710
             path: contracts/creature-racer-referral-nft.clar
             anchor-block-only: true
