@@ -11,6 +11,7 @@
 
 ;; Error definitions
 ;; -----------------
+(define-constant err-forbidden (err u403))
 (define-constant err-user-not-found (err u404))
 (define-constant err-operator-unset (err u1001))
 
@@ -65,7 +66,7 @@
 ;; TODO: consider factoring this concept out to dedicated
 ;; contract.
 (define-public (change-operator (new-operator principal))
-    (let ((old var-get operator))
+    (let ((old (var-get operator)))
       (asserts! (is-eq tx-sender contract-owner) err-forbidden)
       (var-set operator (some new-operator))
       (ok old)
