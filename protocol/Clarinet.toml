@@ -10,8 +10,14 @@ contract_id = "SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait"
 
 [project.cache_location]
 path = ".requirements"
+[contracts.creature-racer-payment]
+path = "contracts/creature-racer-payment.clar"
+
 [contracts.creature-racer-referral-nft]
 path = "contracts/creature-racer-referral-nft.clar"
+
+[contracts.creature-racer-referral-pool]
+path = "contracts/creature-racer-referral-pool.clar"
 
 [repl]
 costs_version = 2
