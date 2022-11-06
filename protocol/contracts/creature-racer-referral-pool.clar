@@ -13,7 +13,6 @@
 ;; -----------------
 (define-constant err-forbidden (err u403))
 (define-constant err-user-not-found (err u404))
-(define-constant err-operator-unset (err u1001))
 
 ;;
 ;; ==================
@@ -21,7 +20,6 @@
 ;; ==================
 ;;
 
-(define-data-var operator (optional principal) none)
 
 
 (define-map withdrawal-counters principal uint)
@@ -55,20 +53,20 @@
 ;; Withdraw funds from pool to sender address.
 ;; amount - amount to withdraw
 ;; withdrawal-count - checksum for withdrawals
-;; backend-sig - backend signature on the request hash
+;; *-sig - argument signature issued by backend
+;; This function can be called by sender who wants to withdraw 
+;; funds from the pool. Signatures issued by operator's private
+;; key need to be passed  
 (define-public (withdraw (amount uint)
+                         (amount-sig (buff 65))
                          (withdrawal-count uint)
-                         (backend-sig (buff 64)))
-    ;; FIXME: need to differentiate between owner and backend
+                         (withdrawal-count-sig (buff 65))
+                         (sender-sig (buff 65))
+                         (sender-pubkey (buff 33))
+    (let (
+          ()
+          )
+
+      )
     (ok u0)
 )
-
-;; TODO: consider factoring this concept out to dedicated
-;; contract.
-(define-public (change-operator (new-operator principal))
-    (let ((old (var-get operator)))
-      (asserts! (is-eq tx-sender contract-owner) err-forbidden)
-      (var-set operator (some new-operator))
-      (ok old)
-      )
-  )
