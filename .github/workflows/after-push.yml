@@ -18,7 +18,7 @@ jobs:
       - name: Unit tests
         run: |
           cd protocol
-          /usr/local/bin/clarinet test > test.out
+          /usr/local/bin/clarinet test > test.out </dev/null
           cat test.out
           grep  FAILURES test.out && exit 1
  
