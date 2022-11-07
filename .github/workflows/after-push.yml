@@ -20,5 +20,6 @@ jobs:
           cd protocol
           /usr/local/bin/clarinet test > test.out </dev/null
           cat test.out
-          grep  FAILURES test.out && exit 1
+          grep -q FAILURES test.out && exit 1
+          exit 0
  
