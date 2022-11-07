@@ -62,11 +62,6 @@
                          (withdrawal-count uint)
                          (withdrawal-count-sig (buff 65))
                          (sender-sig (buff 65))
-                         (sender-pubkey (buff 33))
-    (let (
-          ()
-          )
-
-      )
-    (ok u0)
+                         (sender-pubkey (buff 33)))
+    (ok u0) ;; TODO: needs implementation
 )
