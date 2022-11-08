@@ -1,0 +1,25 @@
+name: after-push
+on: [push]
+env:
+  CLARINET_DISABLE_HINTS: 1
+jobs:
+  check:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Static analysis
+        run: |
+          cd protocol
+          /usr/local/bin/clarinet check
+  test:
+    runs-on: [self-hosted]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Unit tests
+        run: |
+          cd protocol
+          /usr/local/bin/clarinet test > test.out </dev/null
+          cat test.out
+          grep -q FAILURES test.out && exit 1
+          exit 0
+ 
