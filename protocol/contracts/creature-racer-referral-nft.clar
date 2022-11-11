@@ -28,6 +28,9 @@
 ;; only first owner of rNFT can perform this action
 (define-constant err-only-first-owner (err u3004))
 
+;; referral code too length error
+(define-constant err-invalid-length (err u3005))
+
 ;; user not allowed to perform transfer
 (define-constant err-forbidden (err u403))
 
@@ -52,8 +55,8 @@
 (define-map rnft-count principal uint)
 
 ;; maps token id to referral code
-(define-map token-ids uint (string-ascii 12))
-(define-map ref-codes (string-ascii 12) uint)
+(define-map token-ids uint (string-utf8 150))
+(define-map ref-codes (string-utf8 150) uint)
 
 ;; invitations counter
 (define-map invitations uint uint)
@@ -118,12 +121,13 @@
 ;; rNFT public interface
 ;;
 (define-public (mint (recipient principal)
-                     (refcode (string-ascii 12))) 
+                     (refcode (string-utf8 150))) 
     (let (
           (your-token-id (+ (var-get last-token-id) u1))
           )
       (try! (contract-call? .creature-racer-admin
                             assert-invoked-by-operator))
+      (asserts! (> (len refcode) u3) err-invalid-length)
       (if (is-none (map-get? ref-codes refcode))
           (if (map-insert rnft-count recipient u1)
               (begin
@@ -144,7 +148,7 @@
 ;;
 ;; Arguments: refcode - ascii string[12]
 ;; Returns: (result uint uint) number of invitations on success
-(define-read-only (get-invitations-by-ref-code (refcode (string-ascii 12)))
+(define-read-only (get-invitations-by-ref-code (refcode (string-utf8 150)))
     (let (
           (token-id (unwrap! (get-token-id refcode) err-not-found))
           )
@@ -162,7 +166,7 @@
       )
   )
 
-(define-read-only (get-token-id (refcode (string-ascii 12)))
+(define-read-only (get-token-id (refcode (string-utf8 150)))
     (match (map-get? ref-codes refcode)
            val (ok val)
            err-not-found)
@@ -188,7 +192,7 @@
   )
 
 (define-public (set-referral-to-receiving-fixed-bonus 
-                (refcode (string-ascii 12)))
+                (refcode (string-utf8 150)))
     (let (
           (token-id (try! (get-token-id refcode)))
           )
@@ -200,7 +204,7 @@
   )
 
 
-(define-public (increment-invitations (refcode (string-ascii 12))
+(define-public (increment-invitations (refcode (string-utf8 150))
                                       (invitee principal))
     (let (
           (token-id (try! (get-token-id refcode)))
