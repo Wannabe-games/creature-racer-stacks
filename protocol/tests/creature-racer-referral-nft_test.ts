@@ -10,7 +10,7 @@ function mintToken(chain: Chain, user: Account, refCode: string,
   return chain.mineBlock([
     Tx.contractCall('creature-racer-referral-nft',
                     'mint', [types.principal(user.address),
-                             types.ascii(refCode)],
+                             types.utf8(refCode)],
                    caller.address)
   ]);
 }
@@ -44,9 +44,54 @@ function getInvitationsByRefCode(chain: Chain,
                                  operator: Account) {
   return chain.callReadOnlyFn('creature-racer-referral-nft',
                               'get-invitations-by-ref-code',
-                              [types.ascii(refcode)],
+                              [types.utf8(refcode)],
                               operator.address).result;
 }
+
+Clarinet.test({
+  name: "Ensure that referral code cannot be less than 4 unicode characters",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let testchr = "\\u{1F37A}";
+    let user = accounts.get('wallet_1')!;
+    let owner = accounts.get('deployer')!;
+    let operator = accounts.get('wallet_3')!;
+
+    setOperator(chain, owner, operator);
+
+    let b1 = mintToken(chain, user, testchr.repeat(3), operator);
+    assertEquals(b1.receipts.length, 1);
+    assertEquals(b1.height, 3);
+    assertEquals(b1.receipts[0].result, '(err u3005)');
+
+    let b2 = mintToken(chain, user, testchr.repeat(4), operator);
+    assertEquals(b2.receipts.length, 1);
+    assertEquals(b2.height, 4);
+    assertEquals(b2.receipts[0].result, '(ok u1)');
+  }
+})
+
+Clarinet.test({
+  name: "Ensure that referral code cannot be more than 150 unicode characters",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let testchr = "\\u{1F37A}";
+    let user = accounts.get('wallet_1')!;
+    let owner = accounts.get('deployer')!;
+    let operator = accounts.get('wallet_3')!;
+
+    setOperator(chain, owner, operator);
+
+    let b1 = mintToken(chain, user, testchr.repeat(151), operator);
+    assertEquals(b1.receipts.length, 0);
+    assertEquals(b1.height, 3);
+
+    let b2 = mintToken(chain, user, testchr.repeat(150), operator);
+    assertEquals(b2.receipts.length, 1);
+    assertEquals(b2.height, 4);
+    assertEquals(b2.receipts[0].result, '(ok u1)');
+    
+  }
+})
+
 
 Clarinet.test({
   name: "Ensure that user can only mint a single rNFT",
@@ -67,7 +112,7 @@ Clarinet.test({
     block = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
                       'mint', [types.principal(user.address),
-                               types.ascii('POELROA')],
+                               types.utf8('POELROA')],
                       operator.address)
     ]);
     assertEquals(block.receipts.length, 1);
@@ -89,11 +134,11 @@ Clarinet.test({
     let block = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
                       'mint', [types.principal(user1.address),
-                               types.ascii('ABCDE')],
+                               types.utf8('ABCDE')],
                       operator.address),
       Tx.contractCall('creature-racer-referral-nft',
                       'mint', [types.principal(user2.address),
-                               types.ascii('ABCDE')],
+                               types.utf8('ABCDE')],
                       operator.address)
     ]);
     assertEquals(block.receipts.length, 2);
@@ -114,7 +159,7 @@ Clarinet.test({
     let block = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
                       'mint', [types.principal(user1.address),
-                               types.ascii('ABCDE')],
+                               types.utf8('ABCDE')],
                       owner.address),
     ]);
     assertEquals(block.receipts.length, 1);
@@ -136,7 +181,7 @@ Clarinet.test({
     let block = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
                       'mint', [types.principal(user1.address),
-                               types.ascii('ABCDE')],
+                               types.utf8('ABCDE')],
                       owner.address),
     ]);
     assertEquals(block.receipts.length, 1);
@@ -164,7 +209,7 @@ Clarinet.test({
     let b2 = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
                       'increment-invitations',
-                      [types.ascii(refcode), 
+                      [types.utf8(refcode), 
                        types.principal(invitee.address)],
                      operator.address)
     ]);
@@ -195,7 +240,7 @@ Clarinet.test({
     let b = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
                       'increment-invitations',
-                      [types.ascii(refcode), 
+                      [types.utf8(refcode), 
                        types.principal(invitee.address)],
                       operator.address)
     ]);
@@ -218,7 +263,7 @@ function incrementInvitations(chain: Chain, refcode: string,
   chain.mineBlock([
     Tx.contractCall('creature-racer-referral-nft',
                     'increment-invitations',
-                    [types.ascii(refcode),
+                    [types.utf8(refcode),
                      types.principal(invitee)],
                     operator.address)
         ]);
