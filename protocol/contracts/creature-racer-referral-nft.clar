@@ -31,6 +31,12 @@
 ;; referral code too length error
 (define-constant err-invalid-length (err u3005))
 
+;; recipient invalid i.e. attempted to transfer to self
+(define-constant err-invalid-recipient (err u3006))
+
+;; numeric argument is out of allowed range
+(define-constant err-argument-out-of-range (err u3007))
+
 ;; user not allowed to perform transfer
 (define-constant err-forbidden (err u403))
 
@@ -101,7 +107,11 @@
                          (recipient principal))
   (begin
    (asserts! (is-eq tx-sender sender) err-forbidden)
+   (asserts! (not (is-eq sender recipient)) 
+             err-invalid-recipient)
+
    (try! (nft-transfer? creature-racer-referral-nft
+                        ;; #[allow(unchecked_data)]
                         token-id
                         sender
                         recipient))
@@ -126,7 +136,9 @@
           (your-token-id (+ (var-get last-token-id) u1))
           )
       (asserts! (> (len refcode) u3) err-invalid-length)
+
       (if (is-none (map-get? ref-codes refcode))
+          ;; #[allow(unchecked_data)]
           (if (map-insert rnft-count recipient u1)
               (begin
                (map-insert first-owner your-token-id recipient)
@@ -196,6 +208,7 @@
           )
       (try! (contract-call? .creature-racer-admin
                             assert-invoked-by-operator))
+      ;; #[allow(unchecked_data)]
       (if (map-insert has-fixed-referral-bonus token-id true)
           (ok true)
           err-has-fixed-bonus))
@@ -209,7 +222,9 @@
           )
      (try! (contract-call? .creature-racer-admin
                            assert-invoked-by-operator))
+     ;; #[allow(unchecked_data)]
      (map-set invitees invitee token-id)
+     ;; #[allow(unchecked_data)]
      (ok (map-set invitations token-id
                   (match (map-get? invitations token-id)
                          cnt (+ cnt u1)
@@ -225,6 +240,9 @@
                           err-not-found))
           )
       (asserts! (is-eq owner tx-sender) err-only-first-owner)
+      (asserts! (<= percentage-basis-points u100)
+                err-argument-out-of-range)
+
       (ok (map-set royalties token-id percentage-basis-points))
       )
   )

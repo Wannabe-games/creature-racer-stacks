@@ -71,5 +71,7 @@
                 (new-operator (optional principal))
                 (new-pubkey (optional (buff 33))))
     (if (is-eq tx-sender contract-owner)
-        (ok (var-set operator new-operator))
+        (if (is-eq (var-get operator) new-operator)
+            (ok false)
+            (ok (var-set operator new-operator)))
         err-forbidden))
