@@ -47,6 +47,9 @@
         )
   )
 
+(define-read-only (get-operator)
+    (ok (var-get operator)))
+
 ;; TODO: Read only function to verify if operator has
 ;; signed the request.
 

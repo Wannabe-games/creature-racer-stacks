@@ -11,6 +11,8 @@
 ;; Contract owner
 (define-constant contract-owner tx-sender)
 
+
+(define-constant fixed-bonus-amount-ustx u250)
 ;;
 ;; ERROR DEFINITIONS
 ;;
@@ -69,6 +71,7 @@
 
 ;; token-id => if token has fixed bonus
 (define-map has-fixed-referral-bonus uint bool)
+(define-map fixed-bonus-charged {rnft-id: uint, invitee: principal} bool)
 
 
 (define-map royalties uint uint)
@@ -156,7 +159,7 @@
   )
 
 ;;
-;; Arguments: refcode - ascii string[12]
+;; Arguments: refcode - utf-8 string[150]
 ;; Returns: (result uint uint) number of invitations on success
 (define-read-only (get-invitations-by-ref-code (refcode (string-utf8 150)))
     (let (
@@ -260,4 +263,31 @@
       (ok { amount: (/ (* sale-price royalty) u10000),
           receiver: owner })
       )
+  )
+
+
+(define-public (calculate-referral-profit (invitee principal) 
+                                          (amount uint))
+    (let
+        (
+         (rnft-id (unwrap! (map-get? invitees invitee)
+                           (ok { profit: u0, rnft-id: u0 })))
+         (ref-bps (unwrap-panic (get-percentage-of-reward-bps invitee)))
+         (has-fb (default-to false 
+                              (map-get? has-fixed-referral-bonus rnft-id)))
+         (fb-charged (default-to false 
+                                  (map-get? fixed-bonus-charged 
+                                            {rnft-id: rnft-id, invitee: invitee})
+                                ))
+         (bonus (if (and has-fb (not fb-charged))
+                    (begin
+                     (map-set fixed-bonus-charged
+                              {rnft-id: rnft-id, invitee: invitee}
+                              true)
+                     fixed-bonus-amount-ustx)
+                    u0))
+         )
+      (ok { profit: (+ bonus (/ (* amount ref-bps) u10000)),
+          rnft-id: rnft-id })
+    )
   )
