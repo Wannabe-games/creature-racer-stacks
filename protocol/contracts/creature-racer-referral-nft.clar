@@ -125,8 +125,6 @@
     (let (
           (your-token-id (+ (var-get last-token-id) u1))
           )
-      (try! (contract-call? .creature-racer-admin
-                            assert-invoked-by-operator))
       (asserts! (> (len refcode) u3) err-invalid-length)
       (if (is-none (map-get? ref-codes refcode))
           (if (map-insert rnft-count recipient u1)
