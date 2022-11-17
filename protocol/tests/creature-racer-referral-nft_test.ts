@@ -6,16 +6,9 @@ import { makeRandomPrivKey,
 import { assertEquals, fail } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 import { setOperator } from './utils/admin.ts';
+import { mintRNFT, incrementInvitations,
+         randomInvites } from './utils/rnft.ts';
 
-function mintToken(chain: Chain, user: Account, refCode: string,
-                   caller: Account) {
-  return chain.mineBlock([
-    Tx.contractCall('creature-racer-referral-nft',
-                    'mint', [types.principal(user.address),
-                             types.utf8(refCode)],
-                   caller.address)
-  ]);
-}
 
 
 function getInvitationsByInvitee(chain: Chain,
@@ -46,12 +39,12 @@ Clarinet.test({
 
     setOperator(chain, owner, operator);
 
-    let b1 = mintToken(chain, user, testchr.repeat(3), operator);
+    let b1 = mintRNFT(chain, user, testchr.repeat(3), operator);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(err u3005)');
 
-    let b2 = mintToken(chain, user, testchr.repeat(4), operator);
+    let b2 = mintRNFT(chain, user, testchr.repeat(4), operator);
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok u1)');
@@ -68,11 +61,11 @@ Clarinet.test({
 
     setOperator(chain, owner, operator);
 
-    let b1 = mintToken(chain, user, testchr.repeat(151), operator);
+    let b1 = mintRNFT(chain, user, testchr.repeat(151), operator);
     assertEquals(b1.receipts.length, 0);
     assertEquals(b1.height, 3);
 
-    let b2 = mintToken(chain, user, testchr.repeat(150), operator);
+    let b2 = mintRNFT(chain, user, testchr.repeat(150), operator);
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok u1)');
@@ -91,7 +84,7 @@ Clarinet.test({
     let operator = accounts.get('wallet_3')!;
     setOperator(chain, owner, operator);
 
-    let block = mintToken(chain, user, 'ABCDE', operator);
+    let block = mintRNFT(chain, user, 'ABCDE', operator);
 
     assertEquals(block.receipts.length, 1);
     assertEquals(block.height, 3);
@@ -150,7 +143,7 @@ Clarinet.test({
     
     let refcode = 'abcdefg';
 
-    let b1 = mintToken(chain, user1, refcode, operator);
+    let b1 = mintRNFT(chain, user1, refcode, operator);
 
     let b2 = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
@@ -203,18 +196,6 @@ Clarinet.test({
   },
 });
 
-function incrementInvitations(chain: Chain, refcode: string,
-                              invitee: string,
-                             operator: Account) {
-  chain.mineBlock([
-    Tx.contractCall('creature-racer-referral-nft',
-                    'increment-invitations',
-                    [types.utf8(refcode),
-                     types.principal(invitee)],
-                    operator.address)
-        ]);
-}
-
 
 Clarinet.test({
   name: "Ensure that correct percent of reward is calculated",
@@ -227,17 +208,8 @@ Clarinet.test({
     let refcode = 'testing';
 
     setOperator(chain, owner, operator);
-    let b1 = mintToken(chain, user1, refcode, operator);
-   
-    const increment = (amount: number) => {
-      for(let i = 0; i < amount; i++) {
-        const pk = makeRandomPrivKey();
-        const pkstr = privateKeyToString(pk);
-        const addr = getAddressFromPrivateKey(pkstr);
-        incrementInvitations(chain, refcode, addr, 
-                             operator);
-      }
-    };
+    let b1 = mintRNFT(chain, user1, refcode, operator);
+    
     
     const getPercentageOfRewardBPS = (user: Account) => {
       const res = chain.callReadOnlyFn('creature-racer-referral-nft',
@@ -251,13 +223,13 @@ Clarinet.test({
                          operator);
     assertEquals(getPercentageOfRewardBPS(user2), '(ok u100)');
 
-    increment(24);
+    randomInvites(chain, 24, refcode, operator);
     assertEquals(getPercentageOfRewardBPS(user2), '(ok u500)');
-    increment(50);
+    randomInvites(chain, 50, refcode, operator);
     assertEquals(getPercentageOfRewardBPS(user2), '(ok u1000)');
-    increment(425);
+    randomInvites(chain, 425, refcode, operator);
     assertEquals(getPercentageOfRewardBPS(user2), '(ok u2000)');
-    increment(1001);
+    randomInvites(chain, 1001, refcode, operator);
     assertEquals(getPercentageOfRewardBPS(user2), '(ok u4000)');
 
   },
@@ -273,7 +245,7 @@ Clarinet.test({
     let operator = accounts.get('wallet_2')!;
 
     setOperator(chain, owner, operator);
-    let b1 = mintToken(chain, user1, 'asdc', operator);
+    let b1 = mintRNFT(chain, user1, 'asdc', operator);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
@@ -299,7 +271,7 @@ Clarinet.test({
     let operator = accounts.get('wallet_2')!;
 
     setOperator(chain, owner, operator);
-    let b1 = mintToken(chain, user1, 'asdc', operator);
+    let b1 = mintRNFT(chain, user1, 'asdc', operator);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
@@ -332,7 +304,7 @@ Clarinet.test({
     let operator = accounts.get('wallet_2')!;
 
     setOperator(chain, owner, operator);
-    let b1 = mintToken(chain, user1, 'asdc', operator);
+    let b1 = mintRNFT(chain, user1, 'asdc', operator);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
