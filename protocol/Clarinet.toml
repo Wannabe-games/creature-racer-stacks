@@ -1,39 +1,41 @@
 [project]
-name = "creature-racer"
+name = 'creature-racer'
+description = ''
 authors = []
-description = ""
 telemetry = false
-boot_contracts = ["pox", "costs-v2", "bns"]
+cache_dir = '.cache'
 
 [[project.requirements]]
-contract_id = "SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait"
-
-[project.cache_location]
-path = ".requirements"
+contract_id = 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait'
 [contracts.creature-racer-admin]
-path = "contracts/creature-racer-admin.clar"
+path = 'contracts/creature-racer-admin.clar'
+clarity_version = 1
 
 [contracts.creature-racer-nft]
-path = "contracts/creature-racer-nft.clar"
+path = 'contracts/creature-racer-nft.clar'
+clarity_version = 1
 
 [contracts.creature-racer-payment]
-path = "contracts/creature-racer-payment.clar"
+path = 'contracts/creature-racer-payment.clar'
+clarity_version = 1
 
 [contracts.creature-racer-referral-nft]
-path = "contracts/creature-racer-referral-nft.clar"
+path = 'contracts/creature-racer-referral-nft.clar'
+clarity_version = 1
 
 [contracts.creature-racer-referral-pool]
-path = "contracts/creature-racer-referral-pool.clar"
+path = 'contracts/creature-racer-referral-pool.clar'
+clarity_version = 1
+
+[contracts.creature-racer-reward-pool]
+path = 'contracts/creature-racer-reward-pool.clar'
+clarity_version = 1
 
 [contracts.creature-racer-staking]
-path = "contracts/creature-racer-staking.clar"
-
-[repl]
-costs_version = 2
-parser_version = 2
-
+path = 'contracts/creature-racer-staking.clar'
+clarity_version = 1
 [repl.analysis]
-passes = ["check_checker"]
+passes = ['check_checker']
 
 [repl.analysis.check_checker]
 strict = false
