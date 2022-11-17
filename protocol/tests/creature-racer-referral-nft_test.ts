@@ -148,48 +148,6 @@ Clarinet.test({
   },
 });
 
-Clarinet.test({
-  name: "Operator needs to be set to mint rNFT",
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-
-    let user1 = accounts.get('wallet_1')!;          
-
-    let owner = accounts.get('deployer')!;
-    
-    let block = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft',
-                      'mint', [types.principal(user1.address),
-                               types.utf8('ABCDE')],
-                      owner.address),
-    ]);
-    assertEquals(block.receipts.length, 1);
-    assertEquals(block.height, 2);
-    assertEquals(block.receipts[0].result, '(err u1001)');
-  },
-});
-
-Clarinet.test({
-  name: "Only operator can mint rNFT",
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-
-    let user1 = accounts.get('wallet_1')!;
-
-    let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_2')!;
-    setOperator(chain, owner, operator);
-    
-    let block = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft',
-                      'mint', [types.principal(user1.address),
-                               types.utf8('ABCDE')],
-                      owner.address),
-    ]);
-    assertEquals(block.receipts.length, 1);
-    assertEquals(block.height, 3);
-    assertEquals(block.receipts[0].result, '(err u403)');
-  },
-});
-
 
 Clarinet.test({
   name: "Ensure that invitations count is tracked for valid refcode",
