@@ -19,13 +19,12 @@ async function main() {
   const deployerAddress = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
   const deployerKey = '753b7cc01a1a2e86221266a154af739463fce51219d97e4f856cd7200c3bd2a601';
 
-  if(process.argv.length < 4) {
-    console.log("usage: node set-operator.js address pubkey");
+  if(process.argv.length < 3) {
+    console.log("usage: node set-operator.js address");
     return;
   }
 
   const operatorAddress = process.argv[2];
-  const operatorPubKey = Buffer.from(process.argv[3], "hex");
 
 
   const callArgs = {
@@ -33,8 +32,7 @@ async function main() {
     contractName: 'creature-racer-admin',
     functionName: 'set-operator',
     fee: 500,
-    functionArgs: [ someCV(standardPrincipalCV(operatorAddress)),
-                    someCV(bufferCV(operatorPubKey)) ],
+    functionArgs: [ someCV(standardPrincipalCV(operatorAddress)) ],
     senderKey: deployerKey,
     validateWithAbi: true,
     network,
