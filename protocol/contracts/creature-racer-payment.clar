@@ -137,9 +137,10 @@
               )
           
           (as-contract
-           (stx-transfer? (- portion-for-reward-pool-2
-                             amount-for-supported-wallet)
-                          tx-sender .creature-racer-reward-pool))
+           (contract-call? .creature-racer-reward-pool
+                           receive-funds
+                           (- portion-for-reward-pool-2
+                              amount-for-supported-wallet)))
           )
         )
       )
