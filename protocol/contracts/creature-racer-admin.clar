@@ -111,17 +111,19 @@
                      )))))))))))))))
   )
     
-
-(define-private (concat-buff (a (optional (buff 177))) 
-                             (b (optional (buff 177))))
+;; Signature payload buffer must be large enough to
+;; keep inner signature (65 bytes) and up to 10 128-bit
+;; arguments, so we need 225 bytes in total.
+(define-private (concat-buff (a (optional (buff 225))) 
+                             (b (optional (buff 225))))
     (match b
            val (some (unwrap-panic (as-max-len? 
                                     (concat val
                                             (unwrap-panic a) 
-                                            ) u177)))
+                                            ) u225)))
            a))
 
-(define-private (make-optional (val (buff 177)))
+(define-private (make-optional (val (buff 225)))
     (some val))
 
 ;;
@@ -181,7 +183,7 @@
 (define-read-only (verify-signature
                    (operator-sig (buff 65))
                    (sender-sig (buff 65))
-                   (args (list 7 uint)))
+                   (args (list 10 uint)))
     (let (
           (argbuff (unwrap-panic
                         (fold concat-buff
@@ -197,7 +199,7 @@
                            err-invalid-signature))
           (msgbuff (unwrap-panic (as-max-len?
                                   (concat sender-sig argbuff)
-                                  u177)))
+                                  u225)))
           (msghash (sha256 msgbuff))
           (operator-pk (unwrap! 
                         (secp256k1-recover? msghash
@@ -205,7 +207,7 @@
                         err-invalid-signature))
           (operator-principal (unwrap! 
                                (principal-of? operator-pk)
-                               (err u3)))
+                               err-invalid-signature))
           (cop (unwrap! (var-get operator)
                         err-operator-unset))
           )
