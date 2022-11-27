@@ -1,11 +1,12 @@
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.4/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
+import { bytesToHex } from 'https://esm.sh/@stacks/common';
 import { pubKeyfromPrivKey, makeRandomPrivKey,
          privateKeyToString,
+         TransactionVersion,
          getAddressFromPrivateKey,
          signMessageHashRsv,
          createStacksPrivateKey } from 'https://esm.sh/@stacks/transactions';
-//import keccak256 from 'https://esm.sh/keccak256';
 import { sha256 } from "https://denopkg.com/chiefbiiko/sha256@v1.0.0/mod.ts";
 
 export function setOperator(chain: Chain, deployer: Account, 
@@ -48,6 +49,12 @@ type ArgSigs = {
   senderSignature: string
 }
 
+type Identity = {
+  address: string,
+  secretKey: string,
+  publicKey: string
+}
+
 export function makeSignatures(operatorPK: string,
                                senderPK: string,
                                ...args: number[]): ArgSigs {
@@ -67,4 +74,14 @@ export function makeSignatures(operatorPK: string,
                                      privateKey: createStacksPrivateKey(operatorPK) });
   return { senderSignature: parseHexString(ssig.data),
            operatorSignature: parseHexString(opsig.data) };
+}
+
+export function makeRandomIdentity(): Identity {
+  const sk = makeRandomPrivKey();
+  const skdata = new Uint8Array([...sk.data, 1]);
+  const skstr = bytesToHex(skdata);
+  const addr = getAddressFromPrivateKey(skdata,
+                                       TransactionVersion.Testnet);
+  return { address: addr, secretKey: skstr,
+           publicKey: pubKeyfromPrivKey(skdata) }
 }
