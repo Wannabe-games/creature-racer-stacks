@@ -49,11 +49,12 @@ type ArgSigs = {
   senderSignature: string
 }
 
-type Identity = {
+export type Identity = {
   address: string,
   secretKey: string,
   publicKey: string
 }
+
 
 export function makeSignatures(operatorPK: string,
                                senderPK: string,
