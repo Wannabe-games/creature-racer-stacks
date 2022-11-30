@@ -10,12 +10,15 @@
 ;;
 (define-constant contract-owner tx-sender)
 
+(define-constant total-fibbo-weight u230)
+
 
 (define-constant err-forbidden (err u403))
 (define-constant err-not-found (err u404))
 (define-constant err-invalid-price (err u2001))
 (define-constant err-mint-cap-exceeded (err u7001))
 (define-constant err-expiry-time-in-past (err u7002))
+(define-constant err-invalid-creature-type (err u7003))
 
 ;;
 ;; ==================
@@ -35,6 +38,16 @@
 (define-map royalties uint uint)
 (define-map first-owner uint principal)
 
+;; See CreatureLib.sol, partValue
+(define-data-var part-value (list 5 uint) 
+  (list 
+   u4802410000  ;; part 1
+   u13583266708 ;; part 2
+   u24954054356 ;; part 3
+   u38419280000 ;; part 4
+   u53692576079 ;; part 5
+   )
+  )
 ;;
 ;; =================
 ;; PRIVATE FUNCTIONS
@@ -101,8 +114,40 @@
   )
 
 (define-private (get-block-time)
+    ;; The primary reason of defaulting to block height
+    ;; is to approximate time for unit tests, at time
+    ;; is undefined there.
     (default-to block-height
         (get-block-info? time block-height)))
+
+(define-private (unpack-creature (args (buff 6)))
+    { type-id: (byte-to-uint (unwrap-panic (element-at args u0))),
+      parts:
+      (list 
+       (byte-to-uint (unwrap-panic (element-at args u1)))
+       (byte-to-uint (unwrap-panic (element-at args u2)))
+       (byte-to-uint (unwrap-panic (element-at args u3)))
+       (byte-to-uint (unwrap-panic (element-at args u4)))
+       (byte-to-uint (unwrap-panic (element-at args u5)))
+       )
+    })
+    
+
+(define-private (part-to-val (part uint))
+    (let
+        (
+         (vals (var-get part-value))
+         )
+      (default-to u0 (element-at vals part))
+      )
+  )
+
+(define-private (stack-value (parts (list 5 uint)))
+    (fold +
+          (map part-to-val parts)
+          u0)
+  )
+
 
 ;;
 ;; ================
@@ -215,6 +260,8 @@
            err-not-found)
   )
 
+
+
 ;; Returns mint cap of given creature
 (define-read-only (get-mint-cap (parts (buff 5)))
     (ok (compute-cap (unpack-args parts)))
@@ -248,7 +295,64 @@
       )
 )
 
+(define-read-only (get-current-owner (nft-id uint))
+    (nft-get-owner? creature-racer-creature-nft
+                    nft-id))
 
+;;
+;; Computing creature staking value (see CreatureLib.sol
+;; creatureWeight et al.)
+;;
+(define-read-only (creature-weight (nft-id uint))
+    (let
+        (
+         (creature (unpack-creature
+                    (try! (get-creature-data nft-id))))
+         (type-fibbo-weights
+          (list u2 u2 u2 u3 u3 u3 u5 u8 u8 u8 u13 
+                u13 u13 u21 u34 u34 u34 u55 u55
+                u55 u89))
+         (type-fibo-weight
+          (unwrap! (element-at type-fibbo-weights 
+                               (- (get type-id creature)
+                                  u1))
+                   err-invalid-creature-type))
+                      
+         )
+      (ok
+       (/ (* (* u100 type-fibo-weight)
+             (stack-value (get parts creature)))
+          total-fibbo-weight))
+      )
+  )
+
+;;
+;;
+;; part value control
+;; ------------------
+;;
+
+;;
+;; Note: those functions can only be called by contract owner
+;;
+
+;;
+;; returns (ok (list 5 uint)) current value of part-value
+;; variable
+(define-read-only (get-part-values)
+    (if (is-eq tx-sender contract-owner)
+        (ok (var-get part-value))
+        err-forbidden)
+  )
+
+(define-public (set-part-values (vals (list 5 uint)))
+    (if (is-eq tx-sender contract-owner)
+        (begin
+         (var-set part-value vals)
+         (ok true)
+         )
+        err-forbidden)
+  )
 ;;
 ;; Functions required by nft-trait
 ;; -------------------------------
