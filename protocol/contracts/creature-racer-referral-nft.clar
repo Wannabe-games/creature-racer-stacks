@@ -76,12 +76,39 @@
 
 (define-map royalties uint uint)
 
+;; transfer approval maps
+(define-map approvals {     owner: principal,
+                            operator: principal } bool)
+(define-map token-approvals { owner: principal,
+                              token: uint,
+                              operator: principal } bool)
+    
+
 ;;
 ;; =================
 ;; PRIVATE FUNCTIONS
 ;; =================
 ;;
 
+
+;; Check if tx-sender is authorized to transfer token
+;; owned by sender.
+(define-private (is-transfer-allowed (token-id uint)
+                                     (sender principal))
+    (if (is-eq sender tx-sender) true
+        (if (default-to false (map-get? approvals
+                                        { owner: sender,
+                                        operator: tx-sender }))
+            true
+            (default-to false
+                (map-get? token-approvals 
+                          { owner: sender,
+                          token: token-id,  
+                          operator: tx-sender })
+              )
+            )
+        )
+  )
 
 
 ;;
@@ -109,7 +136,7 @@
 (define-public (transfer (token-id uint) (sender principal)
                          (recipient principal))
   (begin
-   (asserts! (is-eq tx-sender sender) err-forbidden)
+   (asserts! (is-transfer-allowed token-id sender) err-forbidden)
    (asserts! (not (is-eq sender recipient)) 
              err-invalid-recipient)
 
@@ -128,6 +155,26 @@
        )
                         
    )
+  )
+
+;;
+;; Transfer approval management
+;;
+
+(define-public (set-approved-for-all (operator principal)
+                                     (approved bool))
+    (ok
+     (map-set approvals { owner: tx-sender,
+              operator: operator } approved)))
+
+(define-public (approve (operator principal)
+                        (token uint)
+                        (approved bool))
+    (ok
+     (map-set token-approvals { owner: tx-sender,
+                                token: token,
+                                operator: operator }
+                                approved))
   )
 
 ;;
