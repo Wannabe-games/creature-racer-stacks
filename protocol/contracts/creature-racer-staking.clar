@@ -9,6 +9,10 @@
 ;; =========
 ;;
 
+(define-constant contract-owner tx-sender)
+
+;; Error definitions
+;; -----------------
 (define-constant err-forbidden (err u403))
 (define-constant err-not-found (err u404))
 (define-constant err-expired (err u419))
@@ -16,12 +20,6 @@
 (define-constant err-creature-locked (err u8002))
 (define-constant err-nothing-to-withdraw (err u8003))
 
-
-(define-constant contract-owner tx-sender)
-
-;; Error definitions
-;; -----------------
-(define-constant err-operator-unset (err u1001))
 
 ;;
 ;; ==================
@@ -77,7 +75,6 @@
          )
       (asserts! (is-eq token-owner tx-sender) err-not-owner)
       (asserts! (not token-expired) err-expired)
-      ;; TODO: check transfer approval?
      
       (try! (as-contract 
              (contract-call? .creature-racer-nft
@@ -89,7 +86,7 @@
                user-staking-key cur-cycle)
       (map-set staked-creatures
                user-staking-key 
-               (+ prev-staked-creatures u1))                      
+               (+ prev-staked-creatures u1))
       (ok true)
       )
   )
@@ -149,8 +146,7 @@
           (prev-total-share (var-get total-share))
           (prev-user-position (unwrap-panic
                                (map-get? user-position user)))
-          (sender tx-sender)
-          (user-staking-key { user: sender, creature: nft-id })
+          (user-staking-key { user: user, creature: nft-id })
           (prev-staked-creatures (unwrap-panic
                                   (map-get? staked-creatures
                                             user-staking-key)))
@@ -160,9 +156,9 @@
       (as-contract (try!
                     (contract-call? .creature-racer-nft
                                     transfer nft-id
-                                    tx-sender sender)))
+                                    tx-sender user)))
       (var-set total-share (- prev-total-share weight))
-      (map-set user-position sender (- prev-user-position weight))
+      (map-set user-position user (- prev-user-position weight))
       (map-set staked-creatures user-staking-key 
                (- prev-staked-creatures u1))
       (ok true)
@@ -195,3 +191,11 @@
   )
 
 
+(define-read-only (get-staked-creatures
+                   (user principal) 
+                   (creature-id uint))
+    (ok (unwrap!
+         (map-get? staked-creatures { user: user,
+                   creature: creature-id} )
+         err-not-found))
+  )

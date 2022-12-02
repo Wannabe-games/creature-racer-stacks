@@ -5,14 +5,7 @@ import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import { setOperator } from './utils/admin.ts';
 import { mintRNFT, incrementInvitations,
          randomInvites } from './utils/rnft.ts';
-
-function getBalance(chain: Chain, account: string) {
-  const balance = chain.getAssetsMaps().assets.STX[account];
-  if(!balance)
-    return 0;
-  else
-    return balance;
-}
+import { getBalance } from './utils/chain.ts';
 
 Clarinet.test({
   name: "Ensure that funds are sent to operator of reward pool",
