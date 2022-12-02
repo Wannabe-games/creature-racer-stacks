@@ -61,9 +61,9 @@ Clarinet.test({
     const s1 = makeSignatures(skOperator, skOperator,
                               1, 1, 1, 1, 1, 1, 1, expiry, 0);
     const s2 = makeSignatures(skOperator, skUserA,
-                              2, 2, 5, 5, 5, 3, 2, expiry, 10);
+                              2, 2, 5, 5, 5, 3, 2, expiry, 1000);
     const s3 = makeSignatures(skOperator, skUserA,
-                              3, 21, 4, 4, 4, 4, 4, expiry, 5);
+                              3, 21, 4, 4, 4, 4, 4, expiry, 500);
     
     let b1 = chain.mineBlock([
       Tx.contractCall('creature-racer-nft', 'mint',
@@ -80,7 +80,7 @@ Clarinet.test({
                         types.buff([2]), 
                         types.buff([5,5,5,3,2]),
                         types.uint(expiry),
-                        types.uint(10), 
+                        types.uint(1000), 
                         types.buff(s2.operatorSignature),
                         types.buff(s2.senderSignature) ],
                         userA.address),
@@ -89,7 +89,7 @@ Clarinet.test({
                         types.buff([21]), 
                         types.buff([4,4,4,4,4]),
                         types.uint(expiry),
-                        types.uint(5), 
+                        types.uint(500), 
                         types.buff(s3.operatorSignature),
                         types.buff(s3.senderSignature) ],
                         userA.address),
@@ -199,9 +199,9 @@ Clarinet.test({
     const s1 = makeSignatures(skOperator, skUserA,
                               1, 1, 1, 1, 1, 1, 1, expiry, 0);
     const s2 = makeSignatures(skOperator, skUserA,
-                              2, 2, 5, 5, 5, 3, 2, expiry, 10);
+                              2, 2, 5, 5, 5, 3, 2, expiry, 1000);
     const s3 = makeSignatures(skOperator, skUserB,
-                              3, 21, 4, 4, 4, 4, 4, expiry, 5);
+                              3, 21, 4, 4, 4, 4, 4, expiry, 500);
     
     let b1 = chain.mineBlock([
       Tx.contractCall('creature-racer-nft', 'mint',
@@ -218,7 +218,7 @@ Clarinet.test({
                         types.buff([2]), 
                         types.buff([5,5,5,3,2]),
                         types.uint(expiry),
-                        types.uint(10), 
+                        types.uint(1000), 
                         types.buff(s2.operatorSignature),
                         types.buff(s2.senderSignature) ],
                         userA.address),
@@ -227,7 +227,7 @@ Clarinet.test({
                         types.buff([21]), 
                         types.buff([4,4,4,4,4]),
                         types.uint(expiry),
-                        types.uint(5), 
+                        types.uint(500), 
                         types.buff(s3.operatorSignature),
                         types.buff(s3.senderSignature) ],
                         userB.address),
