@@ -5,7 +5,7 @@ import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import { setOperator, 
          makeSignatures } from './utils/admin.ts';
 import { Identity } from './utils/admin.ts';
-import { getNFTBalance } from './utils/chain.ts';
+import { getNFTBalance, userA, userB } from './utils/chain.ts';
 
 const nftClass = '.creature-racer-nft.creature-racer-creature-nft';
 
@@ -31,25 +31,6 @@ function mintCreature(chain: Chain, user: Identity,
   ]);
   assertEquals(b.receipts.length, 1);
   assertEquals(b.receipts[0].result, '(ok true)');
-}
-
-function userA(accounts: Map<string, Account>): Identity {
-  const userA = accounts.get('wallet_2')!;
-  const idA: Identity = {
-    address: userA.address,
-    secretKey: '530d9f61984c888536871c6573073bdfc0058896dc1adfe9a6a10dfacadc209101'
-  };
-  return idA;
-}
-
-function userB(accounts: Map<string, Account>): Identity {
-  const userB = accounts.get('wallet_3')!;
-  const idB: Identity = {
-    address: userB.address,
-    secretKey: 'd655b2523bcd65e34889725c73064feb17ceb796831c0e111ba1a552b0f31b3901'
-  };
-  return idB;
-
 }
 
 function getUserShare(chain: Chain, user: Identity) {

@@ -13,6 +13,8 @@
 ;; -----------------
 (define-constant err-forbidden (err u403))
 (define-constant err-user-not-found (err u404))
+(define-constant err-insufficient-funds (err u2002))
+(define-constant err-invalid-withdrawal-count (err u6001))
 
 ;;
 ;; ==================
@@ -23,6 +25,7 @@
 
 
 (define-map withdrawal-counters principal uint)
+
 
 ;; private functions
 ;;
@@ -57,11 +60,27 @@
 ;; This function can be called by sender who wants to withdraw 
 ;; funds from the pool. Signatures issued by operator's private
 ;; key need to be passed  
-(define-public (withdraw (amount uint)
-                         (amount-sig (buff 65))
-                         (withdrawal-count uint)
-                         (withdrawal-count-sig (buff 65))
+(define-public (withdraw (operator-sig (buff 65))
                          (sender-sig (buff 65))
-                         (sender-pubkey (buff 33)))
-    (ok u0) ;; TODO: needs implementation
-)
+                         (amount uint)
+                         (withdrawal-count uint))
+    (let (
+          (sender tx-sender)
+          (balance (get-balance))
+          (wcnt (+ (default-to u0 (map-get? withdrawal-counters
+                                          sender))
+                   u1))
+          )
+      (try! (contract-call? .creature-racer-admin
+                            verify-signature
+                            operator-sig
+                            sender-sig
+                            (list amount withdrawal-count)))
+      (asserts! (>= balance amount) err-insufficient-funds)
+      (asserts! (is-eq withdrawal-count wcnt)
+                err-invalid-withdrawal-count)
+      (try! (as-contract (stx-transfer? amount tx-sender sender)))
+      (map-set withdrawal-counters sender wcnt)
+      (ok true)
+    )
+  )
