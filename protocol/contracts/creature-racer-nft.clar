@@ -220,8 +220,9 @@
                         (list expiry price))))
       (if (> price u0)
           (try!
-           (stx-transfer? price sender 
-                          .payment-contract)) true)
+           (contract-call? .creature-racer-payment
+                           receive-funds  
+                           price)) true)
       (let
           (
            (block-time (get-block-time))

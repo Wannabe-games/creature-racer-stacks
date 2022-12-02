@@ -115,7 +115,7 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 7, 1, 4, 3, 5, 4, 100, 100];
+    const nftParams = [1, 7, 1, 4, 3, 5, 4, 100, 1000];
     mintCreature(chain, uA, nftParams);
       
     let b1 = chain.mineBlock([
