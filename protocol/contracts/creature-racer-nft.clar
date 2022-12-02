@@ -32,7 +32,8 @@
 
 (define-map approvals {     owner: principal,
                             operator: principal } bool)
-(define-map token-approvals { token: uint,
+(define-map token-approvals { owner: principal,
+                              token: uint,
                               operator: principal } bool)
     
 
@@ -165,7 +166,8 @@
             true
             (default-to false
                 (map-get? token-approvals 
-                          { token: token-id,
+                          { owner: sender,
+                          token: token-id,  
                           operator: tx-sender })
               )
             )
@@ -383,6 +385,16 @@
     (ok
      (map-set approvals { owner: tx-sender,
               operator: operator } approved)))
+
+(define-public (approve (operator principal)
+                        (token uint)
+                        (approved bool))
+    (ok
+     (map-set token-approvals { owner: tx-sender,
+                                token: token,
+                                operator: operator }
+                                approved))
+  )
 ;;
 ;; Functions required by nft-trait
 ;; -------------------------------
@@ -392,7 +404,7 @@
     (ok (var-get last-token)))
 
 (define-read-only (get-token-uri (token-id uint))
-    (ok none)) ;; TODO: implement
+    (ok none)) ;; Not supported
 
 (define-read-only (get-owner (token-id uint))
     (ok (nft-get-owner? creature-racer-creature-nft token-id))
