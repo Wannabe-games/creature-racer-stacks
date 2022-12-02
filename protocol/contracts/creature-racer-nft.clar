@@ -30,6 +30,12 @@
 
 (define-data-var last-token uint u0)
 
+(define-map approvals {     owner: principal,
+                            operator: principal } bool)
+(define-map token-approvals { token: uint,
+                              operator: principal } bool)
+    
+
 (define-map free-mint principal bool)
 (define-map creature-keys uint (buff 6))
 (define-map creature-supply  (buff 6) uint)
@@ -148,6 +154,24 @@
           u0)
   )
 
+;; Check if tx-sender is authorized to transfer token
+;; owned by sender.
+(define-private (is-transfer-allowed (token-id uint)
+                                     (sender principal))
+    (if (is-eq sender tx-sender) true
+        (if (default-to false (map-get? approvals
+                                        { owner: sender,
+                                        operator: tx-sender }))
+            true
+            (default-to false
+                (map-get? token-approvals 
+                          { token: token-id,
+                          operator: tx-sender })
+              )
+            )
+        )
+  )
+            
 
 ;;
 ;; ================
@@ -353,6 +377,12 @@
          )
         err-forbidden)
   )
+
+(define-public (set-approved-for-all (operator principal)
+                                     (approved bool))
+    (ok
+     (map-set approvals { owner: tx-sender,
+              operator: operator } approved)))
 ;;
 ;; Functions required by nft-trait
 ;; -------------------------------
@@ -370,11 +400,10 @@
 
 (define-public (transfer (token-id uint) (sender principal)
                          (recipient principal))
-    (begin
-     (asserts! (is-eq tx-sender sender) err-forbidden)
-     (nft-transfer? creature-racer-creature-nft
-                    token-id
-                    sender
-                    recipient)
-     )
+    (if (is-transfer-allowed token-id sender)
+        (nft-transfer? creature-racer-creature-nft
+                       token-id
+                       sender
+                       recipient)
+        err-forbidden)
   )
