@@ -159,6 +159,7 @@
 (define-public (set-portion-for-operator (amount uint))
     (let ((old-portion (var-get portion-for-operator)))
       (asserts! (is-eq tx-sender contract-owner) err-forbidden)
+      ;; #[allow(unchecked_data)]
       (var-set portion-for-operator amount)
       (ok old-portion)
       )
@@ -168,11 +169,14 @@
 ;; ----------------------------------
 ;; Returns:
 ;; (result (optional principal) uint) principal of previous supported wallet
+
 (define-public (change-supported-wallet (new-supported (optional principal))
                                         (new-percent uint))
     (let ((old-wallet (var-get supported-wallet)))
       (asserts! (is-eq tx-sender contract-owner) err-forbidden)
+      ;; #[allow(unchecked_data)]
       (var-set supported-wallet new-supported)
+      ;; #[allow(unchecked_data)]
       (var-set percent-for-supported-wallet new-percent)
       (ok old-wallet)
       )

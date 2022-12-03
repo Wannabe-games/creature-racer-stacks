@@ -161,20 +161,42 @@
 ;; Transfer approval management
 ;;
 
+;; (Dis-)Approve operator for transfer of any NFT owned by
+;; tx-sender. 
+;; Returns: (ok true)  if setting's successfuly updated.
+;;          (ok false) if operator is equal to sender.
 (define-public (set-approved-for-all (operator principal)
                                      (approved bool))
-    (ok
-     (map-set approvals { owner: tx-sender,
-              operator: operator } approved)))
-
+    (if (is-eq operator tx-sender)
+        (ok false)
+        (ok
+         ;; #[allow(unchecked_data)]
+         (map-set approvals { owner: tx-sender,
+                  operator: operator } approved)))
+  )
+  
+;; (Dis-)Approve operator for transfer of given NFT owned
+;; by tx-sender. 
+;; Returns: (ok true)  if setting's successfuly updated.
+;;          (ok false) if operator is equal to sender.
+;;          (err u403) if sender doesn't own the NFT.
 (define-public (approve (operator principal)
                         (token uint)
                         (approved bool))
-    (ok
-     (map-set token-approvals { owner: tx-sender,
-                                token: token,
-                                operator: operator }
-                                approved))
+    (if (is-eq (some tx-sender)
+               (nft-get-owner? creature-racer-referral-nft
+                               token))
+        (if (is-eq operator tx-sender)
+            (ok false)
+            (ok
+             ;; #[allow(unchecked_data)]
+             (map-set token-approvals { owner: tx-sender,
+                      token: token,
+                      operator: operator }
+                      approved))
+            )
+        err-forbidden
+        )
   )
 
 ;;
@@ -328,6 +350,7 @@
                                 ))
          (bonus (if (and has-fb (not fb-charged))
                     (begin
+                     ;; #[allow(unchecked_data)]
                      (map-set fixed-bonus-charged
                               {rnft-id: rnft-id, invitee: invitee}
                               true)
