@@ -19,6 +19,8 @@
 (define-constant err-mint-cap-exceeded (err u7001))
 (define-constant err-expiry-time-in-past (err u7002))
 (define-constant err-invalid-creature-type (err u7003))
+(define-constant err-value-out-of-range (err u7004))
+(define-constant err-not-enough-arguments (err u7005))
 
 ;;
 ;; ==================
@@ -60,7 +62,10 @@
 ;; PRIVATE FUNCTIONS
 ;; =================
 ;;
+
+;; #[allow(unchecked_params)]
 (define-private (byte-to-uint (value (buff 1)))
+    ;; #[allow(unchecked_data)]
     (let 
         (
          (bytes
@@ -157,6 +162,8 @@
 
 ;; Check if tx-sender is authorized to transfer token
 ;; owned by sender.
+
+;; #[allow(unchecked_params)]
 (define-private (is-transfer-allowed (token-id uint)
                                      (sender principal))
     (if (is-eq sender tx-sender) true
@@ -226,6 +233,7 @@
       (let
           (
            (block-time (get-block-time))
+           ;; #[allow(unchecked_data)]
            (creature-key (make-creature-key type-id parts))
            (mint-cap (compute-cap unpacked-parts))
            (supply (default-to u0 
@@ -235,6 +243,8 @@
         (asserts! (> mint-cap supply) err-mint-cap-exceeded)
         (asserts! (> expiry block-time) 
                   err-expiry-time-in-past)
+        
+        ;; #[allow(unchecked_data)]
         (try! (nft-mint? 
                creature-racer-creature-nft
                nft-id
@@ -254,10 +264,6 @@
       )
   )
 
-
-
-;; NOTE: Solidity "mintManyNFTCreatures" not compatible with Clarity,
-;; thus not going to be implemented.
 
 
 (define-read-only (is-expired (nft-id uint))
@@ -303,9 +309,12 @@
 (define-public (set-royalty (nft-id uint) 
                             (percentage-points uint))
     (let (
+          ;; #[allow(unchecked_data)]          
           (owner (try! (get-first-owner nft-id)))
           )
       (asserts! (is-eq owner tx-sender) err-forbidden)
+      (asserts! (<= percentage-points u100) err-value-out-of-range)
+      ;; #[allow(unchecked_data)]
       (ok (map-set royalties nft-id percentage-points))
       )
 )
@@ -334,7 +343,10 @@
     (let
         (
          (creature (unpack-creature
-                    (try! (get-creature-data nft-id))))
+                    (try! 
+                     ;; #[allow(unchecked_data)]
+                     (get-creature-data nft-id)
+                     )))
          (type-fibbo-weights
           (list u2 u2 u2 u3 u3 u3 u5 u8 u8 u8 u13 
                 u13 u13 u21 u34 u34 u34 u55 u55
@@ -374,27 +386,54 @@
 
 (define-public (set-part-values (vals (list 5 uint)))
     (if (is-eq tx-sender contract-owner)
-        (begin
-         (var-set part-value vals)
-         (ok true)
-         )
+        (if (> (len vals) u0)
+            (begin
+             (var-set part-value vals)
+             (ok true)
+             ) err-not-enough-arguments)
+        
         err-forbidden)
   )
+;;
+;; Transfer approval management
+;;
 
+;; (Dis-)Approve operator for transfer of any NFT owned by
+;; tx-sender. 
+;; Returns: (ok true)  if setting's successfuly updated.
+;;          (ok false) if operator is equal to sender.
 (define-public (set-approved-for-all (operator principal)
                                      (approved bool))
-    (ok
-     (map-set approvals { owner: tx-sender,
-              operator: operator } approved)))
-
+    (if (is-eq operator tx-sender)
+        (ok false)
+        (ok
+         ;; #[allow(unchecked_data)]
+         (map-set approvals { owner: tx-sender,
+                  operator: operator } approved)))
+  )
+  
+;; (Dis-)Approve operator for transfer of given NFT owned
+;; by tx-sender. 
+;; Returns: (ok true)  if setting's successfuly updated.
+;;          (ok false) if operator is equal to sender.
+;;          (err u403) if sender doesn't own the NFT.
 (define-public (approve (operator principal)
                         (token uint)
                         (approved bool))
-    (ok
-     (map-set token-approvals { owner: tx-sender,
-                                token: token,
-                                operator: operator }
-                                approved))
+    (if (is-eq (some tx-sender)
+               (nft-get-owner? creature-racer-creature-nft
+                               token))
+        (if (is-eq operator tx-sender)
+            (ok false)
+            (ok
+             ;; #[allow(unchecked_data)]
+             (map-set token-approvals { owner: tx-sender,
+                      token: token,
+                      operator: operator }
+                      approved))
+            )
+        err-forbidden
+        )
   )
 ;;
 ;; Functions required by nft-trait
@@ -414,6 +453,7 @@
 (define-public (transfer (token-id uint) (sender principal)
                          (recipient principal))
     (if (is-transfer-allowed token-id sender)
+        ;; #[allow(unchecked_data)]
         (nft-transfer? creature-racer-creature-nft
                        token-id
                        sender

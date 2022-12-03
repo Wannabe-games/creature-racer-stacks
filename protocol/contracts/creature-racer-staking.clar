@@ -157,7 +157,9 @@
                     (contract-call? .creature-racer-nft
                                     transfer nft-id
                                     tx-sender user)))
+      ;; #[allow(unchecked_data)]
       (var-set total-share (- prev-total-share weight))
+      ;; #[allow(unchecked_data)]
       (map-set user-position user (- prev-user-position weight))
       (map-set staked-creatures user-staking-key 
                (- prev-staked-creatures u1))
