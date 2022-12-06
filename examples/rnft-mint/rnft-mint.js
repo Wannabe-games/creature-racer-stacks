@@ -15,15 +15,13 @@ async function main() {
   const deployerAddress = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
   const senderKey = '6a1a754ba863d7bab14adbbc3f8ebb090af9e871ace621d3e5ab634e1422885e01';
   
-  const receiverAddress = 'ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5';
 
   const callArgs = {
     contractAddress: deployerAddress,
     contractName: 'creature-racer-referral-nft',
     functionName: 'mint',
     fee: 500,
-    functionArgs: [ standardPrincipalCV(receiverAddress),
-                    stringUtf8CV('ABCDEF') ],
+    functionArgs: [ stringUtf8CV('ABCDEF') ],
     senderKey: senderKey,
     validateWithAbi: true,
     network,

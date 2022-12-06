@@ -39,12 +39,12 @@ Clarinet.test({
 
     setOperator(chain, owner, operator);
 
-    let b1 = mintRNFT(chain, user, testchr.repeat(3), operator);
+    let b1 = mintRNFT(chain, user, testchr.repeat(3));
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(err u3005)');
 
-    let b2 = mintRNFT(chain, user, testchr.repeat(4), operator);
+    let b2 = mintRNFT(chain, user, testchr.repeat(4));
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok u1)');
@@ -61,11 +61,11 @@ Clarinet.test({
 
     setOperator(chain, owner, operator);
 
-    let b1 = mintRNFT(chain, user, testchr.repeat(151), operator);
+    let b1 = mintRNFT(chain, user, testchr.repeat(151));
     assertEquals(b1.receipts.length, 0);
     assertEquals(b1.height, 3);
 
-    let b2 = mintRNFT(chain, user, testchr.repeat(150), operator);
+    let b2 = mintRNFT(chain, user, testchr.repeat(150));
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok u1)');
@@ -84,7 +84,7 @@ Clarinet.test({
     let operator = accounts.get('wallet_3')!;
     setOperator(chain, owner, operator);
 
-    let block = mintRNFT(chain, user, 'ABCDE', operator);
+    let block = mintRNFT(chain, user, 'ABCDE');
 
     assertEquals(block.receipts.length, 1);
     assertEquals(block.height, 3);
@@ -92,9 +92,8 @@ Clarinet.test({
 
     block = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
-                      'mint', [types.principal(user.address),
-                               types.utf8('POELROA')],
-                      operator.address)
+                      'mint', [types.utf8('POELROA')],
+                      user.address)
     ]);
     assertEquals(block.receipts.length, 1);
     assertEquals(block.height, 4);
@@ -114,13 +113,11 @@ Clarinet.test({
     
     let block = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
-                      'mint', [types.principal(user1.address),
-                               types.utf8('ABCDE')],
-                      operator.address),
+                      'mint', [types.utf8('ABCDE')],
+                      user1.address),
       Tx.contractCall('creature-racer-referral-nft',
-                      'mint', [types.principal(user2.address),
-                               types.utf8('ABCDE')],
-                      operator.address)
+                      'mint', [types.utf8('ABCDE')],
+                      user2.address)
     ]);
     assertEquals(block.receipts.length, 2);
     assertEquals(block.height, 3);
@@ -143,7 +140,7 @@ Clarinet.test({
     
     let refcode = 'abcdefg';
 
-    let b1 = mintRNFT(chain, user1, refcode, operator);
+    let b1 = mintRNFT(chain, user1, refcode);
 
     let b2 = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft',
@@ -208,7 +205,7 @@ Clarinet.test({
     let refcode = 'testing';
 
     setOperator(chain, owner, operator);
-    let b1 = mintRNFT(chain, user1, refcode, operator);
+    let b1 = mintRNFT(chain, user1, refcode);
     
     
     const getPercentageOfRewardBPS = (user: Account) => {

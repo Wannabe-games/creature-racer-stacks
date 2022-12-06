@@ -202,9 +202,9 @@
 ;;
 ;; rNFT public interface
 ;;
-(define-public (mint (recipient principal)
-                     (refcode (string-utf8 150))) 
+(define-public (mint (refcode (string-utf8 150))) 
     (let (
+          (recipient tx-sender)
           (your-token-id (+ (var-get last-token-id) u1))
           )
       (asserts! (> (len refcode) u3) err-invalid-length)
