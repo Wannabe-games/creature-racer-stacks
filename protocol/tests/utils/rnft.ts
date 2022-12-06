@@ -4,13 +4,11 @@ import { pubKeyfromPrivKey, makeRandomPrivKey,
          privateKeyToString,
          getAddressFromPrivateKey } from 'https://esm.sh/@stacks/transactions';
 
-export function mintRNFT(chain: Chain, user: Account, refCode: string,
-                   caller: Account) {
+export function mintRNFT(chain: Chain, user: Account, refCode: string) {
   return chain.mineBlock([
     Tx.contractCall('creature-racer-referral-nft',
-                    'mint', [types.principal(user.address),
-                             types.utf8(refCode)],
-                   caller.address)
+                    'mint', [types.utf8(refCode)],
+                   user.address)
   ]);
 }
 
