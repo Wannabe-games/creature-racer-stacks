@@ -10,6 +10,8 @@ const {
   privateKeyToString,
   TransactionVersion,
   NonFungibleConditionCode,
+  createAssetInfo,
+  makeStandardNonFungiblePostCondition,
   AnchorMode, PostConditionMode
 } = require("@stacks/transactions");
 const { StacksTestnet } = require("@stacks/network");
@@ -61,14 +63,25 @@ async function enterStaking(nftId, ownerKey, ownerAddr) {
   // when implementing end user interaction - a workaround
   // would be to have implicit approval when staking and
   // guard with post conditions.
-  //  await approveForTransfer(nftId, ownerKey, network);
+  // await approveForTransfer(nftId, ownerKey, network);
 
   // Create post conditions to allow transferring the
   // nft
-  const postConditionAddress = 'SP2ZD731ANQZT6J4K3F5N8A40ZXWXC1XFXHVVQFKE';
   const postConditionCode = NonFungibleConditionCode.Sends;
-  const assetAddress = 'SP62M8MEFH32WGSB7XSF9WJZD7TQB48VQB5ANWSJ';
   const assetContractName = 'creature-racer-nft';
+  const assetName = 'creature-racer-creature-nft';
+  const tokenAssetName = uintCV(nftId) ;
+  const nonFungibleAssetInfo = createAssetInfo(contractAddress, 
+                                               assetContractName,
+                                               assetName);
+  const postConditions = [
+    makeStandardNonFungiblePostCondition(
+      ownerAddr,
+      postConditionCode,
+      nonFungibleAssetInfo,
+      tokenAssetName),
+  ];
+
   const callArgs = {
     contractAddress: contractAddress,
     contractName: stakingContractName,
@@ -81,7 +94,8 @@ async function enterStaking(nftId, ownerKey, ownerAddr) {
     validateWithAbi: true,
     network,
     anchorMode: AnchorMode.Any,
-    postConditionMode: PostConditionMode.Allow,
+    postConditions: postConditions,
+    postConditionMode: PostConditionMode.Deny,
   };
   const tx = await makeContractCall(callArgs);
   const result = await broadcastTransaction(tx, network);
