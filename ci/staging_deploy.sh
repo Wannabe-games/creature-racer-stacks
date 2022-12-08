@@ -31,3 +31,5 @@ tmux new-session -d -c $PROTOCOL_DIR -s $SESSION_NAME \
 sleep 25s
 cd examples/faucet
 node topup.js
+cd ../admin
+node set-operator.js ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
