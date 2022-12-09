@@ -61,7 +61,7 @@
 ;; funds from the pool. Signatures issued by operator's private
 ;; key need to be passed  
 (define-public (withdraw (operator-sig (buff 65))
-                         (sender-sig (buff 65))
+                         (sender-pk (buff 33))
                          (amount uint)
                          (withdrawal-count uint))
     (let (
@@ -74,7 +74,7 @@
       (try! (contract-call? .creature-racer-admin
                             verify-signature
                             operator-sig
-                            sender-sig
+                            sender-pk
                             (list amount withdrawal-count)))
       (asserts! (>= balance amount) err-insufficient-funds)
       (asserts! (is-eq withdrawal-count wcnt)

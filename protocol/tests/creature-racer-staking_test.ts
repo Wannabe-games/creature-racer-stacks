@@ -3,7 +3,7 @@ import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarine
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
 import { setOperator, 
-         makeSignatures } from './utils/admin.ts';
+         makeSignature } from './utils/admin.ts';
 import { Identity } from './utils/admin.ts';
 import { getNFTBalance, userA, userB } from './utils/chain.ts';
 
@@ -14,7 +14,7 @@ function mintCreature(chain: Chain, user: Identity,
                      nftParams: []) {
   const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
    
-  const sigs = makeSignatures(skOperator, user.secretKey,
+  const sigs = makeSignature(skOperator, user.publicKey,
                               ...nftParams);
   let b = chain.mineBlock([
     Tx.contractCall('creature-racer-nft', 'mint',
@@ -26,7 +26,7 @@ function mintCreature(chain: Chain, user: Identity,
                       types.uint(nftParams[7]),
                       types.uint(nftParams[8]),
                       types.buff(sigs.operatorSignature),
-                      types.buff(sigs.senderSignature) ],
+                      types.buff(sigs.senderPubKey) ],
                     user.address)
   ]);
   assertEquals(b.receipts.length, 1);

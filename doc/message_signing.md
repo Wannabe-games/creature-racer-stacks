@@ -29,41 +29,29 @@ Conceptually this is shown on diagram below.
                             |
                             v
 
-                         argbuff ---+
-                                    |
-                            |       |
-                            v       |
-                       +---------+  |
-                       |  sha256 |  |
-                       +---------+  |
-                            |       |
-                            v       |
-                       +---------+  |
-  sender-sec-key ----->|  sign   |  |
-                       +---------+  |
-                        /   |       |
-                       /    v       v
-                      /   +----------+
-                     /    |   join   |
-                    +     +----------+
-                    |          |
-                    |          v
-                    |     +----------+
-                    |     |  sha256  |   operator-sec-key
-                    |     +----------+           |
-                    |          |                 +
-                    |          v                /
-                    |     +----------+         /
-                    |     |   sign   |<-------+
-                    |     +----------+
-                    |          |
-                    |          |
-    senderSignature o          o operatorSignature
+                         argbuff
+                            |
+                            v
+                          +----------+
+ sender-pub-key-str -+--->|   join   |
+                     |    +----------+
+                     |         |
+                     |         v
+                     |    +----------+
+                     |    |  sha256  |   operator-sec-key
+                     |    +----------+           |
+                     |         |                 +
+                     |         v                /
+                     |    +----------+         /
+                     |    |   sign   |<-------+
+                     |    +----------+
+                     |         |
+                     |         |
+        Senderpubkey o         o operatorSignature
 ```
 
 
 ## Example
 
-See `makeSignatures` in
+See `makeSignature` in
 [admin.ts](../protocol/tests/utils/admin.ts).
-

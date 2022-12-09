@@ -46,7 +46,7 @@ function parseHexString(str) {
 
 type ArgSigs = {
   operatorSignature: string,
-  senderSignature: string
+  senderPubKey: string
 }
 
 export type Identity = {
@@ -56,25 +56,21 @@ export type Identity = {
 }
 
 
-export function makeSignatures(operatorPK: string,
-                               senderPK: string,
-                               ...args: number[]): ArgSigs {
+export function makeSignature(operatorPK: string,
+                              senderPK: string,
+                              ...args: number[]): ArgSigs {
   // Start by computing argument checksum
-  var buff = [];
+  const pkData = parseHexString(senderPK);
+  var buff = pkData;
   for(var i = 0; i < args.length; i++) {
     buff = buff.concat(uint128toBytes(args[i]));
   }
 
-  const argshash = sha256(buff);
-  // sign the hash with sender key
-  const ssig = signMessageHashRsv({ messageHash: argshash,
-                                    privateKey: createStacksPrivateKey(senderPK) });
-  const msg = parseHexString(ssig.data).concat(buff);
-  const msghash = sha256(msg);
+  const msghash = sha256(buff);
   const opsig = signMessageHashRsv({ messageHash: msghash,
                                      privateKey: createStacksPrivateKey(operatorPK) });
-  return { senderSignature: parseHexString(ssig.data),
-           operatorSignature: parseHexString(opsig.data) };
+  return { operatorSignature: parseHexString(opsig.data),
+           senderPubKey: pkData };
 }
 
 export function makeRandomIdentity(): Identity {
@@ -84,5 +80,5 @@ export function makeRandomIdentity(): Identity {
   const addr = getAddressFromPrivateKey(skdata,
                                        TransactionVersion.Testnet);
   return { address: addr, secretKey: skstr,
-           publicKey: pubKeyfromPrivKey(skdata) }
+           publicKey: bytesToHex(pubKeyfromPrivKey(skstr).data) }
 }
