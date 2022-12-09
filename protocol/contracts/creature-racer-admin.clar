@@ -171,18 +171,16 @@
 ;;
 ;; Verify if the argument list signatures are correct
 ;;
-;; Signatures are correct if sender-sig is a valid
-;; signature placed by current tx-sender over kaccak256
-;; hash of argument buffer and operator-sig is
-;; a valid signature placed by operator over kaccak256
-;; hash of sender-sig and argument list.
+;; Signature is correct if operator-sig is a valid signature
+;; placed by operator over sha256  hash of sender-pk and 
+;; argument list.
 ;;
 ;; Returns: (ok true) if verification was successful
 ;;          (err u1001) if operator principal is not set
 ;;          (err u1002) in case of verification failure
 (define-read-only (verify-signature
                    (operator-sig (buff 65))
-                   (sender-sig (buff 65))
+                   (sender-pk (buff 33))
                    (args (list 10 uint)))
     (let (
           (argbuff (unwrap-panic
@@ -191,14 +189,10 @@
                                    (map uint-to-buff args))
                               none)))
           (arghash (sha256 argbuff))
-          (sender-pk (unwrap! (secp256k1-recover? arghash 
-                                                  sender-sig)
-                              err-invalid-signature))
-                              
           (sender (unwrap! (principal-of? sender-pk)
                            err-invalid-signature))
           (msgbuff (unwrap-panic (as-max-len?
-                                  (concat sender-sig argbuff)
+                                  (concat sender-pk argbuff)
                                   u225)))
           (msghash (sha256 msgbuff))
           (operator-pk (unwrap! 

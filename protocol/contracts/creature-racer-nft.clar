@@ -209,7 +209,7 @@
                      (expiry uint)
                      (price uint)
                      (operator-sig (buff 65))
-                     (sender-sig (buff 65)))
+                     (sender-pk (buff 33)))
     (let (
           (sender tx-sender)
           (unpacked-parts (unpack-args parts))
@@ -218,7 +218,7 @@
        (contract-call? .creature-racer-admin
                        verify-signature
                        operator-sig
-                       sender-sig
+                       sender-pk
                        (concat
                         (concat 
                          (list nft-id

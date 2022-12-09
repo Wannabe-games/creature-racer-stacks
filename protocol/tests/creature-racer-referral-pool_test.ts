@@ -2,7 +2,7 @@
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.4/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import { setOperator,
-         makeSignatures } from './utils/admin.ts';
+         makeSignature } from './utils/admin.ts';
 import { Identity } from './utils/admin.ts';
 import { getBalance, userA } from './utils/chain.ts';
 
@@ -24,13 +24,13 @@ Clarinet.test({
     assertEquals(b1.receipts.length, 1);
 
     const before = getBalance(chain, uA.address);
-    const sigs = makeSignatures(skOperator, uA.secretKey,
+    const sigs = makeSignature(skOperator, uA.publicKey,
                                 1,1);
     let b2 = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-pool',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
-                        types.buff(sigs.senderSignature),
+                        types.buff(sigs.senderPubKey),
                         types.uint(1), types.uint(1) ],
                       uA.address)
     ]);
@@ -44,7 +44,7 @@ Clarinet.test({
       Tx.contractCall('creature-racer-referral-pool',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
-                        types.buff(sigs.senderSignature),
+                        types.buff(sigs.senderPubKey),
                         types.uint(1), types.uint(1) ],
                       uA.address)
     ]);

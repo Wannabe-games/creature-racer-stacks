@@ -61,7 +61,7 @@
 
 ;; Withdraw assets from pool
 (define-public (withdraw (operator-sig (buff 65))
-                         (sender-sig (buff 65))
+                         (sender-pk (buff 33))
                          (amount uint)
                          (withdrawal-count uint)
                          (cycle uint))
@@ -76,7 +76,7 @@
       (try! (contract-call? .creature-racer-admin
                             verify-signature
                             operator-sig
-                            sender-sig
+                            sender-pk
                             (list amount withdrawal-count cycle)))
       (asserts! (>= balance amount) err-insufficient-funds)
       (asserts! (is-eq withdrawal-count

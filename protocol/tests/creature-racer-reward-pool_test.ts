@@ -2,10 +2,11 @@
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.5/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import { setOperator,
-         makeSignatures } from './utils/admin.ts';
+         makeSignature } from './utils/admin.ts';
 
 const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
-const skUserA = '530d9f61984c888536871c6573073bdfc0058896dc1adfe9a6a10dfacadc209101';
+const pkOperator ='03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9'; 
+const pkUserA = '021843d01fa0bb9a3495fd2caf92505a81055dbe1fd545880fd40c3a1c7fd9c40a';
 
 Clarinet.test({
   name: "Ensure that it returns error when there is no funds to withdraw",
@@ -14,13 +15,13 @@ Clarinet.test({
     const operator = accounts.get('wallet_1')!;
     setOperator(chain, deployer, operator);
     const userA = accounts.get('wallet_2')!;
-    const sigs = makeSignatures(skOperator, skUserA,
+    const sigs = makeSignature(skOperator, pkUserA,
                                 10, 1, 0);
     let b1 = chain.mineBlock([
       Tx.contractCall('creature-racer-reward-pool',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
-                        types.buff(sigs.senderSignature),
+                        types.buff(sigs.senderPubKey),
                         types.uint(10), types.uint(1),
                         types.uint(0)],
                       userA.address)
@@ -38,7 +39,7 @@ Clarinet.test({
     const operator = accounts.get('wallet_1')!;
     setOperator(chain, deployer, operator);
     const userA = accounts.get('wallet_2')!;
-    const sigs = makeSignatures(skOperator, skUserA,
+    const sigs = makeSignature(skOperator, pkUserA,
                                 10, 2, 0);
     let b1 = chain.mineBlock([
       Tx.contractCall('creature-racer-reward-pool',
@@ -48,7 +49,7 @@ Clarinet.test({
       Tx.contractCall('creature-racer-reward-pool',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
-                        types.buff(sigs.senderSignature),
+                        types.buff(sigs.senderPubKey),
                         types.uint(10), types.uint(2),
                         types.uint(0)],
                       userA.address)
@@ -195,14 +196,14 @@ Clarinet.test({
     assertEquals(b5.receipts[4].result, '(ok u0)');
     
 
-    const withdrawalSigs = makeSignatures(skOperator,
-                                          skUserA,
+    const withdrawalSigs = makeSignature(skOperator,
+                                          pkUserA,
                                           1500, 1, 1);
     let b6 = chain.mineBlock([
       Tx.contractCall('creature-racer-reward-pool',
                       'withdraw',
                       [ types.buff(withdrawalSigs.operatorSignature),
-                        types.buff(withdrawalSigs.senderSignature),
+                        types.buff(withdrawalSigs.senderPubKey),
                         types.uint(1500),
                         types.uint(1),
                         types.uint(1) ],

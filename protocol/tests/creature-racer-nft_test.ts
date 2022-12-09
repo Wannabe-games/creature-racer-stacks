@@ -2,13 +2,13 @@ import { addSeconds, getUnixTime } from 'https://esm.sh/date-fns';
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.4/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import { setOperator,
-         makeSignatures,
+         makeSignature,
          makeRandomIdentity } from './utils/admin.ts';
 
 const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
-const skUserA = '530d9f61984c888536871c6573073bdfc0058896dc1adfe9a6a10dfacadc209101';
-const skUserB = 'd655b2523bcd65e34889725c73064feb17ceb796831c0e111ba1a552b0f31b3901';
-
+const pkOperator = '03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9';
+const pkUserA =  '021843d01fa0bb9a3495fd2caf92505a81055dbe1fd545880fd40c3a1c7fd9c40a';
+const pkUserB = '02c4b5eacb71a27be633ed970dcbc41c00440364bc04ba38ae4683ac24e708bf33';
 
 Clarinet.test({
     name: "Ensure that it refuses mint token with wrong params",
@@ -25,7 +25,7 @@ Clarinet.test({
       const nftParams = [1, 1, 1, 1, 1, 1, 1, expiry, 100];
       const wrongParams = [1, 1, 1, 1, 1, 1, 1, expiry, 90];
 
-      const sigs = makeSignatures(skOperator, skUserA,
+      const sigs = makeSignature(skOperator, pkUserA,
                                   ...nftParams);      
       
       let b1 = chain.mineBlock([
@@ -36,7 +36,7 @@ Clarinet.test({
                           types.uint(expiry),
                           types.uint(90), 
                           types.buff(sigs.operatorSignature),
-                          types.buff(sigs.senderSignature) ],
+                          types.buff(sigs.senderPubKey) ],
                         userA.address),
                         
       ]);
@@ -58,11 +58,11 @@ Clarinet.test({
     const userA = accounts.get('wallet_2')!;
     const expiry = getUnixTime(addSeconds(currentDate, 100));
     
-    const s1 = makeSignatures(skOperator, skOperator,
+    const s1 = makeSignature(skOperator, pkOperator,
                               1, 1, 1, 1, 1, 1, 1, expiry, 0);
-    const s2 = makeSignatures(skOperator, skUserA,
+    const s2 = makeSignature(skOperator, pkUserA,
                               2, 2, 5, 5, 5, 3, 2, expiry, 1000);
-    const s3 = makeSignatures(skOperator, skUserA,
+    const s3 = makeSignature(skOperator, pkUserA,
                               3, 21, 4, 4, 4, 4, 4, expiry, 500);
     
     let b1 = chain.mineBlock([
@@ -73,7 +73,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(0), 
                         types.buff(s1.operatorSignature),
-                        types.buff(s1.senderSignature) ],
+                        types.buff(s1.senderPubKey) ],
                         operator.address),
       Tx.contractCall('creature-racer-nft', 'mint',
                       [ types.uint(2),
@@ -82,7 +82,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(1000), 
                         types.buff(s2.operatorSignature),
-                        types.buff(s2.senderSignature) ],
+                        types.buff(s2.senderPubKey) ],
                         userA.address),
       Tx.contractCall('creature-racer-nft', 'mint',
                       [ types.uint(3),
@@ -91,7 +91,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(500), 
                         types.buff(s3.operatorSignature),
-                        types.buff(s3.senderSignature) ],
+                        types.buff(s3.senderPubKey) ],
                         userA.address),
     ]);
     assertEquals(b1.receipts.length, 3);
@@ -163,7 +163,7 @@ Clarinet.test({
       
     const userA = accounts.get('wallet_2')!;
 
-    const sgn = makeSignatures(skOperator, skUserA,
+    const sgn = makeSignature(skOperator, pkUserA,
                                33, 16, 5, 5, 5, 5, 5, 0, 0);
 
     let b1 = chain.mineBlock([
@@ -174,7 +174,7 @@ Clarinet.test({
                         types.uint(0),
                         types.uint(0),
                         types.buff(sgn.operatorSignature),
-                        types.buff(sgn.senderSignature) ],
+                        types.buff(sgn.senderPubKey) ],
                       userA.address),
     ]);
     assertEquals(b1.receipts.length, 1);
@@ -196,11 +196,11 @@ Clarinet.test({
     const userB = accounts.get('wallet_3')!;
     const expiry = getUnixTime(addSeconds(currentDate, 100));
     
-    const s1 = makeSignatures(skOperator, skUserA,
+    const s1 = makeSignature(skOperator, pkUserA,
                               1, 1, 1, 1, 1, 1, 1, expiry, 0);
-    const s2 = makeSignatures(skOperator, skUserA,
+    const s2 = makeSignature(skOperator, pkUserA,
                               2, 2, 5, 5, 5, 3, 2, expiry, 1000);
-    const s3 = makeSignatures(skOperator, skUserB,
+    const s3 = makeSignature(skOperator, pkUserB,
                               3, 21, 4, 4, 4, 4, 4, expiry, 500);
     
     let b1 = chain.mineBlock([
@@ -211,7 +211,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(0), 
                         types.buff(s1.operatorSignature),
-                        types.buff(s1.senderSignature) ],
+                        types.buff(s1.senderPubKey) ],
                         userA.address),
       Tx.contractCall('creature-racer-nft', 'mint',
                       [ types.uint(2),
@@ -220,7 +220,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(1000), 
                         types.buff(s2.operatorSignature),
-                        types.buff(s2.senderSignature) ],
+                        types.buff(s2.senderPubKey) ],
                         userA.address),
       Tx.contractCall('creature-racer-nft', 'mint',
                       [ types.uint(3),
@@ -229,7 +229,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(500), 
                         types.buff(s3.operatorSignature),
-                        types.buff(s3.senderSignature) ],
+                        types.buff(s3.senderPubKey) ],
                         userB.address),
     ]);
     assertEquals(b1.receipts.length, 3);
@@ -258,7 +258,7 @@ Clarinet.test({
       
     for(let i = 0; i < 32; i++) {
       const ri = makeRandomIdentity();
-      const sigs = makeSignatures(skOperator, ri.secretKey,
+      const sigs = makeSignature(skOperator, ri.publicKey,
                                   i, 16, 5, 5, 5, 5, 5,
                                   expiry, 0);
       const args = [ types.uint(i), types.buff([16]),
@@ -266,7 +266,7 @@ Clarinet.test({
                           types.uint(expiry),
                           types.uint(0),
                           types.buff(sigs.operatorSignature),
-                          types.buff(sigs.senderSignature) ];
+                          types.buff(sigs.senderPubKey) ];
       const b1 = chain.mineBlock([
         Tx.transferSTX(10, ri.address, operator.address),
         Tx.contractCall('creature-racer-nft', 'mint',
@@ -277,7 +277,7 @@ Clarinet.test({
       assertEquals(b1.receipts[1].result, '(ok true)');
     }
 
-    const s2 = makeSignatures(skOperator, skUserA,
+    const s2 = makeSignature(skOperator, pkUserA,
                               33, 16, 5, 5, 5, 5, 5,
                               expiry, 0);
     const b2 = chain.mineBlock([
@@ -287,7 +287,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(0),
                         types.buff(s2.operatorSignature),
-                        types.buff(s2.senderSignature) ],
+                        types.buff(s2.senderPubKey) ],
                       userA.address)
     ]);
     assertEquals(b2.receipts.length, 1);
@@ -295,7 +295,7 @@ Clarinet.test({
 
     for(let i = 0; i < 32; i++) {
       const ri = makeRandomIdentity();
-      const sigs = makeSignatures(skOperator, ri.secretKey,
+      const sigs = makeSignature(skOperator, ri.publicKey,
                                   i + 32, 4, 5, 5, 5, 5, 5,
                                   expiry, 0);
       const args = [ types.uint(i+32), types.buff([4]),
@@ -303,7 +303,7 @@ Clarinet.test({
                      types.uint(expiry),
                      types.uint(0),
                      types.buff(sigs.operatorSignature),
-                     types.buff(sigs.senderSignature)];
+                     types.buff(sigs.senderPubKey)];
       const b3 = chain.mineBlock([
         Tx.transferSTX(10, ri.address, operator.address),
         Tx.contractCall('creature-racer-nft', 'mint',
@@ -313,7 +313,7 @@ Clarinet.test({
       assertEquals(b3.receipts[0].result, '(ok true)');
     }
 
-    const s4 = makeSignatures(skOperator, skUserA,
+    const s4 = makeSignature(skOperator, pkUserA,
                               80, 4, 5, 5, 5, 5, 5,
                               expiry, 0);
     const b4 = chain.mineBlock([
@@ -323,7 +323,7 @@ Clarinet.test({
                         types.uint(expiry),
                         types.uint(0),
                         types.buff(s4.operatorSignature),
-                        types.buff(s4.senderSignature) ],
+                        types.buff(s4.senderPubKey) ],
                       userA.address)
     ]);
 
@@ -343,7 +343,7 @@ Clarinet.test({
     
     setOperator(chain, deployer, operator);
       
-    const sgn = makeSignatures(skOperator, skUserA,
+    const sgn = makeSignature(skOperator, pkUserA,
                                123, 4, 3, 3, 3, 5, 2,
                                4, 0);
     const b1 = chain.mineBlock([
@@ -354,7 +354,7 @@ Clarinet.test({
                         types.uint(4),
                         types.uint(0),
                         types.buff(sgn.operatorSignature),
-                        types.buff(sgn.senderSignature) ],
+                        types.buff(sgn.senderPubKey) ],
                       userA.address)
     ]);
     assertEquals(b1.receipts.length, 1);
@@ -387,7 +387,7 @@ Clarinet.test({
     
     setOperator(chain, deployer, operator);
       
-    const sgn = makeSignatures(skOperator, skUserA,
+    const sgn = makeSignature(skOperator, pkUserA,
                                10, 20, 1, 1, 1, 1, 1,
                                1000, 0);
     const b1 = chain.mineBlock([
@@ -398,7 +398,7 @@ Clarinet.test({
                         types.uint(1000),
                         types.uint(0),
                         types.buff(sgn.operatorSignature),
-                        types.buff(sgn.senderSignature) ],
+                        types.buff(sgn.senderPubKey) ],
                       userA.address),
       Tx.contractCall('creature-racer-nft', 'set-royalty',
                       [types.uint(10), types.uint(100)],

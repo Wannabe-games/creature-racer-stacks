@@ -59,7 +59,7 @@ function sign(buffer, key) {
 async function mintCreature(nftId, typeId, part1, part2, 
                             part3, part4, part5,
                             expiryTimestamp, price, ownerKey,
-                            ownerAddr) {
+                            ownerPubKey, ownerAddr) {
   const apiEndpoint = 'https://stacksapi-testnet.wannabe.games';
   //const apiEndpoint = 'http://localhost:3999';
   const network = new StacksTestnet( { url: apiEndpoint } );
@@ -67,8 +67,8 @@ async function mintCreature(nftId, typeId, part1, part2,
   // see `mint` in creature-racer-nft.clar
 
   // Sign minted creature arguments
-  var argBuff = [];
-  argBuff = argBuff.concat(uint128toBytes(nftId))
+  var payload = parseHexString(ownerPubKey);
+  payload = payload.concat(uint128toBytes(nftId))
     .concat(uint128toBytes(typeId))
     .concat(uint128toBytes(part1))
     .concat(uint128toBytes(part2))
@@ -78,10 +78,6 @@ async function mintCreature(nftId, typeId, part1, part2,
     .concat(uint128toBytes(expiryTimestamp))
     .concat(uint128toBytes(price));
 
-  // this signature should be made by wallet
-  const ownerSignature = sign(argBuff, ownerKey);
-
-  const payload = parseHexString(ownerSignature.data).concat(argBuff);
 
   // this signature should be requested from backend
   const operatorSignature = sign(payload, operatorKey);
@@ -110,7 +106,7 @@ async function mintCreature(nftId, typeId, part1, part2,
       uintCV(expiryTimestamp),
       uintCV(price),
       bufferCV(new Uint8Array(parseHexString(operatorSignature.data))),
-      bufferCV(new Uint8Array(parseHexString(ownerSignature.data)))
+      bufferCV(new Uint8Array(parseHexString(ownerPubKey)))
     ],
     senderKey: ownerKey,
     validateWithAbi: true,
@@ -127,6 +123,7 @@ async function mintCreature(nftId, typeId, part1, part2,
 async function main() {
   // Get a valid parameters from your protocol/settings/Devnet.toml
   const senderKey = '6a1a754ba863d7bab14adbbc3f8ebb090af9e871ace621d3e5ab634e1422885e01';
+  const senderPubKey = '029fb154a570a1645af3dd43c3c668a979b59d21a46dd717fd799b13be3b2a0dc7';
   const senderAddr = 'ST3NBRSFKX28FQ2ZJ1MAKX58HKHSDGNV5N7R21XCP';
 
   // This mints the creature for sender and transfers 30000 ustx from 
@@ -137,6 +134,7 @@ async function main() {
                             Math.floor(Date.now() / 1000) + 2592000,
                             30000,
                             senderKey,
+                            senderPubKey,
                             senderAddr);
 }
 
