@@ -1,5 +1,11 @@
 # Error codes used in the project
 
+Error values reported by creature racer smart contracts are, by
+convention, greater than 100.
+
+Error values which are <= 10 originate from Stacks public
+functions directly.
+
 ## Any context
 
 ## err-forbidden (err u403)
