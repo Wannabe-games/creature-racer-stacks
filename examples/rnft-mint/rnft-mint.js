@@ -8,7 +8,8 @@ const { StacksTestnet } = require("@stacks/network");
 
 
 async function main() {
-  const apiEndpoint = 'https://stacksapi-testnet.wannabe.games';
+  //const apiEndpoint = 'https://stacksapi-testnet.wannabe.games';
+  const apiEndpoint = 'http://localhost:3999';
   const network = new StacksTestnet( { url: apiEndpoint } );
 
   // Get a valid parameters from your protocol/settings/Devnet.toml
