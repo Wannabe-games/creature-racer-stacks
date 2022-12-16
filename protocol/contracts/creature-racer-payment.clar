@@ -20,7 +20,6 @@
 (define-constant err-forbidden (err u403))
 (define-constant err-operator-unset (err u1001))
 (define-constant err-insufficient-amount (err u2001))
-(define-constant err-insufficient-funds (err u2002))
 (define-constant err-unknown-transfer-error (err u2003))
 
 

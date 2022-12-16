@@ -16,7 +16,6 @@
 ;; Invocation not allowed in given context (i.e. restricted 
 ;; to owner)
 (define-constant err-forbidden (err u403))
-(define-constant err-invalid-arg (err u500))
 
 ;; Operator for this contract hasn't been set
 (define-constant err-operator-unset (err u1001))

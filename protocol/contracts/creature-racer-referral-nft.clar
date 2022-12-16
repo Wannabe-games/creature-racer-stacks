@@ -215,6 +215,9 @@
               (begin
                (map-insert first-owner your-token-id recipient)
                (map-insert ref-codes refcode your-token-id)
+               (try! (nft-mint? creature-racer-referral-nft 
+                                your-token-id
+                                tx-sender))
                (ok your-token-id)
                ) err-rnft-already-granted)
           err-refcode-used)

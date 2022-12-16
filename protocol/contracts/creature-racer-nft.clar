@@ -15,7 +15,6 @@
 
 (define-constant err-forbidden (err u403))
 (define-constant err-not-found (err u404))
-(define-constant err-invalid-price (err u2001))
 (define-constant err-mint-cap-exceeded (err u7001))
 (define-constant err-expiry-time-in-past (err u7002))
 (define-constant err-invalid-creature-type (err u7003))
