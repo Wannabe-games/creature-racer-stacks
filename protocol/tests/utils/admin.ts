@@ -13,7 +13,7 @@ export function setOperator(chain: Chain, deployer: Account,
                      operator: Account) {
   let secretKey = 'd655b2523bcd65e34889725c73064feb17ceb796831c0e111ba1a552b0f31b3901';
   let block = chain.mineBlock([
-    Tx.contractCall('creature-racer-admin',
+    Tx.contractCall('creature-racer-admin-v1',
                     'set-operator', 
                     [types.some(types.principal(operator.address))],
                     deployer.address)

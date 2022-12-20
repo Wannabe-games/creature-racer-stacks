@@ -19,7 +19,7 @@ async function main() {
 
   const callArgs = {
     contractAddress: deployerAddress,
-    contractName: 'creature-racer-referral-nft',
+    contractName: 'creature-racer-referral-nft-v1',
     functionName: 'mint',
     fee: 500,
     functionArgs: [ stringUtf8CV('ABCDEF') ],

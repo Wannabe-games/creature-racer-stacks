@@ -214,7 +214,7 @@
           (unpacked-parts (unpack-args parts))
           )
       (try! 
-       (contract-call? .creature-racer-admin
+       (contract-call? .creature-racer-admin-v1
                        verify-signature
                        operator-sig
                        sender-pk
@@ -226,7 +226,7 @@
                         (list expiry price))))
       (if (> price u0)
           (try!
-           (contract-call? .creature-racer-payment
+           (contract-call? .creature-racer-payment-v1
                            receive-funds  
                            price)) true)
       (let
