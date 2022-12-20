@@ -28,8 +28,9 @@ fi
 
 tmux new-session -d -c $PROTOCOL_DIR -s $SESSION_NAME \
      'clarinet integrate -c'
-sleep 25s
+sleep 45s
 cd examples/faucet
 node topup.js
 cd ../admin
+sleep 45s
 node set-operator.js ST1SJ3DTE5DN7X54YDH5D64R3BCB6A2AG2ZQ8YPD5
