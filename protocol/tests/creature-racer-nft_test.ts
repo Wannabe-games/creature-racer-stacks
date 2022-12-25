@@ -1,14 +1,21 @@
 import { addSeconds, getUnixTime } from 'https://esm.sh/date-fns';
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.4/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
+import { userA, userB, userC,
+         getNFTBalance } from './utils/chain.ts';
 import { setOperator,
          makeSignature,
-         makeRandomIdentity } from './utils/admin.ts';
+         makeRandomIdentity,
+       } from './utils/admin.ts';
+import { mintCreature, transferCreature, 
+         approveTransfer } from './utils/cnft.ts';
 
 const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
 const pkOperator = '03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9';
 const pkUserA =  '021843d01fa0bb9a3495fd2caf92505a81055dbe1fd545880fd40c3a1c7fd9c40a';
 const pkUserB = '02c4b5eacb71a27be633ed970dcbc41c00440364bc04ba38ae4683ac24e708bf33';
+ 
+const nftClass = '.creature-racer-nft-v1.creature-racer-creature-nft';
 
 Clarinet.test({
     name: "Ensure that it refuses mint token with wrong params",
@@ -431,5 +438,113 @@ Clarinet.test({
                                      userA.address);
 
     assertEquals(res.result, '(err u404)');
+  }
+});
+
+
+
+Clarinet.test({
+  name: "Ensure that owner  can transfer cNFT",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const params = [1, 1, 1, 1, 1, 1, 1, 1000, 0];
+    const uA = userA(accounts);
+    const uB = userB(accounts);
+    const uC = userC(accounts);
+    const deployer = accounts.get('deployer')!;
+    const operator = accounts.get('wallet_1')!;
+
+    setOperator(chain, deployer, operator);
+    const beforeA = getNFTBalance(chain, nftClass, uA.address);
+    mintCreature(chain, uA, params);
+    const afterA = getNFTBalance(chain, nftClass,  uA.address);
+    assertEquals(afterA - beforeA, 1);
+
+    const t0B = getNFTBalance(chain, nftClass, uB.address);
+    
+    let res = transferCreature(chain, 1, uC, uA, uB);
+    const t1A = getNFTBalance(chain, nftClass, uA.address);
+    const t1B = getNFTBalance(chain, nftClass, uB.address);
+
+    assertEquals(res, "(err u403)");
+    assertEquals(t0B, t1B);
+    assertEquals(afterA, t1A);
+
+    res = transferCreature(chain, 1, uA, uA, uB);
+    const t2A = getNFTBalance(chain, nftClass, uA.address);
+    const t2B = getNFTBalance(chain, nftClass, uB.address);
+    assertEquals(res, '(ok true)');
+    assertEquals(t2A-t1A, -1);
+    assertEquals(t2B-t1B, 1);
+
+    res = transferCreature(chain, 1, uA, uB, uA);
+    assertEquals(res, '(err u403)');
+  }
+});
+
+Clarinet.test({
+  name: "Ensure that delegated principal can transfer cNFT",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const params = [1, 1, 1, 1, 1, 1, 1, 1000, 0];
+    const uA = userA(accounts);
+    const uB = userB(accounts);
+    const uC = userC(accounts);
+    const deployer = accounts.get('deployer')!;
+    const operator = accounts.get('wallet_1')!;
+
+
+    setOperator(chain, deployer, operator);
+    const beforeA = getNFTBalance(chain, nftClass, uA.address);
+    mintCreature(chain, uA, params);
+    const afterA = getNFTBalance(chain, nftClass,  uA.address);
+    assertEquals(afterA - beforeA, 1);
+
+    const t0B = getNFTBalance(chain, nftClass, uB.address);
+    
+    approveTransfer(chain, 1, uA, uC.address);
+
+    let res = transferCreature(chain, 1, uC, uA, uB);
+    const t1A = getNFTBalance(chain, nftClass, uA.address);
+    const t1B = getNFTBalance(chain, nftClass, uB.address);
+
+    assertEquals(res, "(ok true)");
+    assertEquals(t0B + 1, t1B);
+    assertEquals(afterA - 1, t1A);
+
+    res = transferCreature(chain, 1, uC, uB, uA);
+    assertEquals(res, '(err u403)');
+  }
+});
+
+Clarinet.test({
+  name: "Ensure that owner cannot transfer cNFT when staking",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const params = [1, 1, 1, 1, 1, 1, 1, 1000, 0];
+    const uA = userA(accounts);
+    const uB = userB(accounts);
+
+    const deployer = accounts.get('deployer')!;
+    const operator = accounts.get('wallet_1')!;
+    const stakingContract = {
+      address: deployer.address + '.creature-racer-staking-v1'
+    };
+
+    setOperator(chain, deployer, operator);
+    mintCreature(chain, uA, params);
+    approveTransfer(chain, 1, uA, stakingContract.address);
+    
+    let b1 = chain.mineBlock([
+      Tx.contractCall('creature-racer-staking-v1',
+                      'enter-staking',
+                      [ types.uint(1) ],
+                      uA.address)
+    ]);
+    assertEquals(b1.receipts.length, 1);
+    assertEquals(b1.receipts[0].result, '(ok true)');
+    
+    let res = transferCreature(chain, 1, uA, stakingContract,
+                               uA);
+    assertEquals(res, '(err u403)');
+
+    
   }
 });
