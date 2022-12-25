@@ -1,4 +1,5 @@
 
+
 ;; creature-racer-nft
 ;; NFT contract for creatures
 (impl-trait 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait.nft-trait)
@@ -453,9 +454,19 @@
                          (recipient principal))
     (if (is-transfer-allowed token-id sender)
         ;; #[allow(unchecked_data)]
-        (nft-transfer? creature-racer-creature-nft
-                       token-id
-                       sender
-                       recipient)
-        err-forbidden)
+        (begin
+         (unwrap!
+          (nft-transfer? creature-racer-creature-nft
+                         token-id
+                         sender
+                         recipient)
+          err-forbidden)
+         (map-delete token-approvals
+                     { owner: sender, 
+                       token: token-id,
+                       operator: tx-sender })
+         (ok true)
+         )
+        err-forbidden
+        )
   )
