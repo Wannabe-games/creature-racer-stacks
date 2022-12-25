@@ -145,6 +145,10 @@
                         token-id
                         sender
                         recipient))
+   (map-delete token-approvals
+               { owner: sender,
+                 token: token-id,
+                 operator: tx-sender })
    (map-set rnft-count sender 
             (- (unwrap-panic (map-get? rnft-count sender))
                              u1))
