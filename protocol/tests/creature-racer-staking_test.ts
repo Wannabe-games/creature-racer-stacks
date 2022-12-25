@@ -6,32 +6,11 @@ import { setOperator,
          makeSignature } from './utils/admin.ts';
 import { Identity } from './utils/admin.ts';
 import { getNFTBalance, userA, userB } from './utils/chain.ts';
+import { mintCreature } from './utils/cnft.ts';
 
 const nftClass = '.creature-racer-nft-v1.creature-racer-creature-nft';
 
 
-function mintCreature(chain: Chain, user: Identity,
-                     nftParams: []) {
-  const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
-   
-  const sigs = makeSignature(skOperator, user.publicKey,
-                              ...nftParams);
-  let b = chain.mineBlock([
-    Tx.contractCall('creature-racer-nft-v1', 'mint',
-                    [ types.uint(nftParams[0]),
-                      types.buff([nftParams[1]]),
-                      types.buff([nftParams[2],nftParams[3],
-                                  nftParams[4],nftParams[5],
-                                  nftParams[6]]),
-                      types.uint(nftParams[7]),
-                      types.uint(nftParams[8]),
-                      types.buff(sigs.operatorSignature),
-                      types.buff(sigs.senderPubKey) ],
-                    user.address)
-  ]);
-  assertEquals(b.receipts.length, 1);
-  assertEquals(b.receipts[0].result, '(ok true)');
-}
 
 function getUserShare(chain: Chain, user: Identity) {
     
