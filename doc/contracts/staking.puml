@@ -1,0 +1,11 @@
+@startuml
+state "creature staked and locked" as staked
+state "creature staked" as staked2
+staked: cycle=n
+staked2: cycle=n+1
+[*] --> staked : user: enter-staking
+staked --> staked2: backend: open-new-cycle
+staked2 --> [*]: user: leave-staking
+staked2 --> [*]: backend: remove-expired-creature
+staked2 --> staked2 : backend: open-new-cycle
+@enduml
