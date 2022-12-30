@@ -9,7 +9,7 @@ implemented by the contracts.
 As a prerequisite to participate in staking user needs to be the
 owner of create NFT at the time he opens a staking position. 
 
-Staking process is governed by `creature-racer-staking-v1`
+Staking process is governed by `creature-racer-staking-v2`
 contract.
 
 
@@ -40,13 +40,13 @@ Also, **backend** can unstake creature by calling
 
 ### Setting creature weights
 
-Creature weights are set in `creature-racer-nft-v1` contract
+Creature weights are set in `creature-racer-nft-v2` contract
 (`set-part-values` function).
 
 ### Managing cycles
 
 Backend manages cycles by calling `open-new-cycle` functions of
-`creature-racer-staking-v1` and `create-racer-reward-pool-v1`
+`creature-racer-staking-v2` and `create-racer-reward-pool-v2`
 contracts.
 
 ### Signing withdrawal requests
