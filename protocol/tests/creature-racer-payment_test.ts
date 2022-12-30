@@ -16,12 +16,12 @@ Clarinet.test({
     let operator = accounts.get('wallet_5')!;
     let supportedWallet = accounts.get('wallet_6')!;
 
-    const rewardPoolAddress = owner.address + '.creature-racer-reward-pool-v1';
+    const rewardPoolAddress = owner.address + '.creature-racer-reward-pool-v2';
 
     setOperator(chain, owner, operator);
 
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'change-supported-wallet',
                       [types.some(types.principal(supportedWallet.address)),
                       types.uint(50)],
@@ -37,7 +37,7 @@ Clarinet.test({
     const supportedBalanceBefore = getBalance(chain, supportedWallet.address);
 
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(1000)],
                      userA.address)
@@ -66,16 +66,16 @@ Clarinet.test({
     let operator = accounts.get('wallet_5')!;
     let supportedWallet = accounts.get('wallet_6')!;
 
-    const rewardPoolAddress = owner.address + '.creature-racer-reward-pool-v1';
+    const rewardPoolAddress = owner.address + '.creature-racer-reward-pool-v2';
 
     setOperator(chain, owner, operator);
 
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'set-portion-for-operator',
                       [types.uint(2)],
                      owner.address),
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'change-supported-wallet',
                       [types.some(types.principal(supportedWallet.address)),
                       types.uint(50)],
@@ -92,7 +92,7 @@ Clarinet.test({
     const supportedBalanceBefore = getBalance(chain, supportedWallet.address);
 
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(10)],
                      userA.address)
@@ -125,9 +125,9 @@ Clarinet.test({
     let operator = accounts.get('wallet_5')!;
     let supportedWallet = accounts.get('wallet_6')!;
 
-    const paymentContractAddress = owner.address + '.creature-racer-payment-v1';
-    const rewardPoolAddress = owner.address + '.creature-racer-reward-pool-v1';
-    const referralPoolAddress = owner.address + '.creature-racer-referral-pool-v1';
+    const paymentContractAddress = owner.address + '.creature-racer-payment-v2';
+    const rewardPoolAddress = owner.address + '.creature-racer-reward-pool-v2';
+    const referralPoolAddress = owner.address + '.creature-racer-referral-pool-v2';
 
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, userA, refcode, operator);
@@ -137,12 +137,12 @@ Clarinet.test({
 
 
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'change-supported-wallet',
                       [types.some(types.principal(supportedWallet.address)),
                       types.uint(50)],
                       owner.address),
-      Tx.contractCall('creature-racer-referral-nft-v1',
+      Tx.contractCall('creature-racer-referral-nft-v2',
                       'increment-invitations',
                       [types.utf8(refcode),
                        types.principal(owner.address)],
@@ -160,7 +160,7 @@ Clarinet.test({
     let supportedWalletBalanceBefore = getBalance(chain, supportedWallet.address);
     
     let b3 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(100100)],
                       owner.address)
@@ -188,7 +188,7 @@ Clarinet.test({
     supportedWalletBalanceBefore = getBalance(chain, supportedWallet.address);
   
     let b4 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(100100)],
                       owner.address)
@@ -209,7 +209,7 @@ Clarinet.test({
     assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 5000);
 
     let b5 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v1',
+      Tx.contractCall('creature-racer-referral-nft-v2',
                       'set-referral-to-receiving-fixed-bonus',
                       [types.utf8(refcode)],
                       operator.address)
@@ -225,7 +225,7 @@ Clarinet.test({
     supportedWalletBalanceBefore = getBalance(chain, supportedWallet.address);
   
     let b6 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(100100)],
                       owner.address)
@@ -252,7 +252,7 @@ Clarinet.test({
   
   
     let b7 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(100100)],
                       owner.address)
@@ -288,7 +288,7 @@ Clarinet.test({
     let operator = accounts.get('wallet_5')!;
     let supportedWallet = accounts.get('wallet_6')!;
 
-    const paymentContractAddress = owner.address + '.creature-racer-payment-v1';
+    const paymentContractAddress = owner.address + '.creature-racer-payment-v2';
 
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, userA, refcode, operator);
@@ -297,12 +297,12 @@ Clarinet.test({
     assertEquals(b1.receipts[0].result, '(ok u1)');
 
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'change-supported-wallet',
                       [types.some(types.principal(supportedWallet.address)),
                       types.uint(50)],
                       owner.address),
-      Tx.contractCall('creature-racer-referral-nft-v1',
+      Tx.contractCall('creature-racer-referral-nft-v2',
                       'increment-invitations',
                       [types.utf8(refcode),
                        types.principal(userB.address)],
@@ -319,7 +319,7 @@ Clarinet.test({
                                                   supportedWallet.address);
     
     let b3 = chain.mineBlock([
-      Tx.contractCall('creature-racer-payment-v1',
+      Tx.contractCall('creature-racer-payment-v2',
                       'receive-funds',
                       [types.uint(1100)],
                       userB.address)
