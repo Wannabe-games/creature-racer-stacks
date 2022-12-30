@@ -32,7 +32,7 @@ async function main() {
 
   const callArgs = {
     contractAddress: deployerAddress,
-    contractName: 'creature-racer-admin-v1',
+    contractName: 'creature-racer-admin-v2',
     functionName: 'set-operator',
     fee: 500,
     functionArgs: [ someCV(standardPrincipalCV(operatorAddress)) ],
