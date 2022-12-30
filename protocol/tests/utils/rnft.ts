@@ -6,7 +6,7 @@ import { pubKeyfromPrivKey, makeRandomPrivKey,
 
 export function mintRNFT(chain: Chain, user: Account, refCode: string) {
   return chain.mineBlock([
-    Tx.contractCall('creature-racer-referral-nft-v1',
+    Tx.contractCall('creature-racer-referral-nft-v2',
                     'mint', [types.utf8(refCode)],
                    user.address)
   ]);
@@ -17,7 +17,7 @@ export function incrementInvitations(chain: Chain, refcode: string,
                                      invitee: string,
                                      operator: Account) {
   chain.mineBlock([
-    Tx.contractCall('creature-racer-referral-nft-v1',
+    Tx.contractCall('creature-racer-referral-nft-v2',
                     'increment-invitations',
                     [types.utf8(refcode),
                      types.principal(invitee)],

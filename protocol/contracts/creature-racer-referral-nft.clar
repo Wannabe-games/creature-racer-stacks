@@ -286,7 +286,7 @@
     (let (
           (token-id (try! (get-token-id refcode)))
           )
-      (try! (contract-call? .creature-racer-admin-v1
+      (try! (contract-call? .creature-racer-admin-v2
                             assert-invoked-by-operator))
       ;; #[allow(unchecked_data)]
       (if (map-insert has-fixed-referral-bonus token-id true)
@@ -300,7 +300,7 @@
     (let (
           (token-id (try! (get-token-id refcode)))
           )
-     (try! (contract-call? .creature-racer-admin-v1
+     (try! (contract-call? .creature-racer-admin-v2
                            assert-invoked-by-operator))
      ;; #[allow(unchecked_data)]
      (map-set invitees invitee token-id)

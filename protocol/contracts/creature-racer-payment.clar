@@ -76,7 +76,7 @@
           (origin tx-sender)
           (operator-principal
            (unwrap! (unwrap! 
-                  (contract-call? .creature-racer-admin-v1
+                  (contract-call? .creature-racer-admin-v2
                                   get-operator)
                   err-operator-unset) err-operator-unset))
           
@@ -91,7 +91,7 @@
             (referral-pool-share 
              (unwrap-panic 
               (as-contract
-               (contract-call? .creature-racer-referral-nft-v1
+               (contract-call? .creature-racer-referral-nft-v2
                                calculate-referral-profit
                                origin portion-for-reward-pool)))
               )
@@ -102,13 +102,13 @@
                  (var-get percent-for-supported-wallet) u0))
             )
         (unwrap-panic (stx-transfer? amount-ustx tx-sender 
-                                     .creature-racer-payment-v1))
+                                     .creature-racer-payment-v2))
         
         (if (> portion-for-referral-pool u0)
             (try! (as-contract 
                     (stx-transfer? portion-for-referral-pool
                                    tx-sender
-                                   .creature-racer-referral-pool-v1)))
+                                   .creature-racer-referral-pool-v2)))
             false)
         (asserts! (try!
                   (as-contract
@@ -136,7 +136,7 @@
               )
           
           (as-contract
-           (contract-call? .creature-racer-reward-pool-v1
+           (contract-call? .creature-racer-reward-pool-v2
                            receive-funds
                            (- portion-for-reward-pool-2
                               amount-for-supported-wallet)))
