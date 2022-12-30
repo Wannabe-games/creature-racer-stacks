@@ -222,6 +222,7 @@
                (try! (nft-mint? creature-racer-referral-nft 
                                 your-token-id
                                 tx-sender))
+               (var-set last-token-id your-token-id)
                (ok your-token-id)
                ) err-rnft-already-granted)
           err-refcode-used)
