@@ -201,3 +201,7 @@
                    creature: creature-id} )
          err-not-found))
   )
+
+
+(define-read-only (get-current-cycle)
+    (ok (var-get cycle)))
