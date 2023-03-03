@@ -53,14 +53,14 @@
         (
          (token-owner 
           (unwrap! 
-           (contract-call? .creature-racer-nft-v2
+           (contract-call? .creature-racer-nft-v3
                            get-current-owner
                            nft-id) err-not-found))
          (token-expired (try! 
-                         (contract-call? .creature-racer-nft-v2
+                         (contract-call? .creature-racer-nft-v3
                                          is-expired nft-id)))
          (weight (try!
-                  (contract-call? .creature-racer-nft-v2
+                  (contract-call? .creature-racer-nft-v3
                                   creature-weight nft-id)))
          (sender tx-sender)
          (cur-cycle (var-get cycle))
@@ -77,7 +77,7 @@
       (asserts! (not token-expired) err-expired)
      
       (try! (as-contract 
-             (contract-call? .creature-racer-nft-v2
+             (contract-call? .creature-racer-nft-v3
                              transfer nft-id
                              sender tx-sender)))
       (var-set total-share (+ prev-share weight))
@@ -107,7 +107,7 @@
                 err-nothing-to-withdraw)
       (let (
             (weight (try!
-                     (contract-call? .creature-racer-nft-v2
+                     (contract-call? .creature-racer-nft-v3
                                      creature-weight nft-id)))
             (prev-total-share (var-get total-share))
             (prev-user-position (unwrap-panic
@@ -115,7 +115,7 @@
             )
         (try! 
          (as-contract
-          (contract-call? .creature-racer-nft-v2
+          (contract-call? .creature-racer-nft-v3
                           transfer
                           nft-id tx-sender sender)))
         (var-set total-share (- prev-total-share weight))
@@ -130,7 +130,7 @@
 
 (define-public (open-new-cycle)
     (begin
-     (try! (contract-call? .creature-racer-admin-v2
+     (try! (contract-call? .creature-racer-admin-v3
                            assert-invoked-by-operator))
      (var-set cycle (+ (var-get cycle) u1))
      (ok true)
@@ -141,7 +141,7 @@
                                         (nft-id uint))
     (let (
           (weight (try!
-                   (contract-call? .creature-racer-nft-v2
+                   (contract-call? .creature-racer-nft-v3
                                    creature-weight nft-id)))
           (prev-total-share (var-get total-share))
           (prev-user-position (unwrap-panic
@@ -151,10 +151,10 @@
                                   (map-get? staked-creatures
                                             user-staking-key)))
           )          
-      (try! (contract-call? .creature-racer-admin-v2
+      (try! (contract-call? .creature-racer-admin-v3
                             assert-invoked-by-operator))
       (as-contract (try!
-                    (contract-call? .creature-racer-nft-v2
+                    (contract-call? .creature-racer-nft-v3
                                     transfer nft-id
                                     tx-sender user)))
       ;; #[allow(unchecked_data)]

@@ -88,14 +88,14 @@ async function mintCreature(nftId, typeId, part1, part2,
     makeStandardSTXPostCondition(
       ownerAddr, FungibleConditionCode.LessEqual, 50000n),
     makeContractSTXPostCondition(
-      contractAddress, 'creature-racer-payment-v2',
+      contractAddress, 'creature-racer-payment-v3',
       FungibleConditionCode.LessEqual,
       50000n)
   ];
 
   const callArgs = {
     contractAddress: contractAddress,
-    contractName: 'creature-racer-nft-v2',
+    contractName: 'creature-racer-nft-v3',
     functionName: 'mint',
     fee: 500,
     functionArgs: [ 
