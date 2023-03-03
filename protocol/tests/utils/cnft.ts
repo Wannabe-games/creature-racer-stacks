@@ -9,7 +9,7 @@ export function mintCreature(chain: Chain, user: Identity,
   const sigs = makeSignature(skOperator, user.publicKey,
                               ...nftParams);
   let b = chain.mineBlock([
-    Tx.contractCall('creature-racer-nft-v2', 'mint',
+    Tx.contractCall('creature-racer-nft-v3', 'mint',
                     [ types.uint(nftParams[0]),
                       types.buff([nftParams[1]]),
                       types.buff([nftParams[2],nftParams[3],
@@ -31,7 +31,7 @@ export function transferCreature(chain: Chain,
                                  fromAccount: Identity,
                                  toAccount: Identity) {
   let b = chain.mineBlock([
-    Tx.contractCall('creature-racer-nft-v2', 'transfer',
+    Tx.contractCall('creature-racer-nft-v3', 'transfer',
                     [ types.uint(nft),
                       types.principal(fromAccount.address),
                       types.principal(toAccount.address) ],
@@ -46,7 +46,7 @@ export function approveTransfer(chain: Chain, nft: number,
                                  owner: Identity, 
                                  delegate: string) {
   let b = chain.mineBlock([
-    Tx.contractCall('creature-racer-nft-v2',
+    Tx.contractCall('creature-racer-nft-v3',
                     'approve',
                     [types.principal(delegate),
                      types.uint(nft),

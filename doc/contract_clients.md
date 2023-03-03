@@ -65,7 +65,7 @@ async function main() {
 
   const callArgs = {
     contractAddress: deployerAddress,
-    contractName: 'creature-racer-referral-nft-v2',
+    contractName: 'creature-racer-referral-nft-v3',
     functionName: 'mint',
     fee: 500,
     // functionArgs correspond to arguments required by mint function
