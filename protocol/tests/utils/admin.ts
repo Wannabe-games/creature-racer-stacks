@@ -6,7 +6,9 @@ import { pubKeyfromPrivKey, makeRandomPrivKey,
          TransactionVersion,
          getAddressFromPrivateKey,
          signMessageHashRsv,
-         createStacksPrivateKey } from 'https://esm.sh/@stacks/transactions';
+         createStacksPrivateKey,
+         stringUtf8CV,
+         serializeCV } from 'https://esm.sh/@stacks/transactions';
 import { sha256 } from "https://denopkg.com/chiefbiiko/sha256@v1.0.0/mod.ts";
 
 export function setOperator(chain: Chain, deployer: Account, 
@@ -32,6 +34,18 @@ function uint128toBytes(v: number) {
   }
   return rv;
 }
+
+
+function uint32toBytes(v: number) {
+  var rv = [];
+
+  for(var n = 0; n < 4; n++) {
+    rv[3-n] = v & 0xff;
+    v = v >> 8;
+  }
+  return rv;
+}
+
 
 function parseHexString(str) { 
   var result = [];
@@ -64,6 +78,25 @@ export function makeSignature(operatorPK: string,
   var buff = pkData;
   for(var i = 0; i < args.length; i++) {
     buff = buff.concat(uint128toBytes(args[i]));
+  }
+
+  const msghash = sha256(buff);
+  const opsig = signMessageHashRsv({ messageHash: msghash,
+                                     privateKey: createStacksPrivateKey(operatorPK) });
+  return { operatorSignature: parseHexString(opsig.data),
+           senderPubKey: pkData };
+}
+
+export function makeSignatureStr(operatorPK: string,
+                                 senderPK: string,
+                                 arg: string): ArgSigs {
+  const pkData = parseHexString(senderPK);
+  const argBuff = Uint8Array.from(arg.split("").map(x => x.charCodeAt()));
+  var buff = pkData;
+  buff = buff.concat(0xE);
+  buff = buff.concat(uint32toBytes(argBuff.length));
+  for(var i = 0; i < argBuff.length; i++) {
+    buff = buff.concat(argBuff[i]);
   }
 
   const msghash = sha256(buff);

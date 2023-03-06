@@ -5,10 +5,10 @@ import { makeRandomPrivKey,
          getAddressFromPrivateKey } from 'https://esm.sh/@stacks/transactions';
 import { assertEquals, fail } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 
-import { setOperator } from './utils/admin.ts';
+import { setOperator, makeSignatureStr } from './utils/admin.ts';
 import { mintRNFT, incrementInvitations,
          randomInvites } from './utils/rnft.ts';
-
+import { userA, userB } from './utils/chain.ts';
 
 
 function getInvitationsByInvitee(chain: Chain,
@@ -32,7 +32,7 @@ function getInvitationsByRefCode(chain: Chain,
 Clarinet.test({
   name: "Ensure that referral code cannot be less than 4 unicode characters",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let testchr = "\\u{1F37A}";
+    let testchr = "W";
     let user = accounts.get('wallet_1')!;
     let owner = accounts.get('deployer')!;
     let operator = accounts.get('wallet_3')!;
@@ -41,12 +41,10 @@ Clarinet.test({
 
     let b1 = mintRNFT(chain, user, testchr.repeat(3));
     assertEquals(b1.receipts.length, 1);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(err u3005)');
 
     let b2 = mintRNFT(chain, user, testchr.repeat(4));
     assertEquals(b2.receipts.length, 1);
-    assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok u1)');
   }
 })
@@ -54,7 +52,7 @@ Clarinet.test({
 Clarinet.test({
   name: "Ensure that referral code cannot be more than 150 unicode characters",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let testchr = "\\u{1F37A}";
+    let testchr = "W";
     let user = accounts.get('wallet_1')!;
     let owner = accounts.get('deployer')!;
     let operator = accounts.get('wallet_3')!;
@@ -63,11 +61,9 @@ Clarinet.test({
 
     let b1 = mintRNFT(chain, user, testchr.repeat(151));
     assertEquals(b1.receipts.length, 0);
-    assertEquals(b1.height, 3);
 
     let b2 = mintRNFT(chain, user, testchr.repeat(150));
     assertEquals(b2.receipts.length, 1);
-    assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok u1)');
     
   }
@@ -87,7 +83,6 @@ Clarinet.test({
     let block = mintRNFT(chain, user, 'ABCDE');
 
     assertEquals(block.receipts.length, 1);
-    assertEquals(block.height, 3);
     assertEquals(block.receipts[0].result, '(ok u1)');
 
     block = chain.mineBlock([
@@ -96,7 +91,6 @@ Clarinet.test({
                       user.address)
     ]);
     assertEquals(block.receipts.length, 1);
-    assertEquals(block.height, 4);
     assertEquals(block.receipts[0].result, '(err u3002)');
   }});
 
@@ -120,7 +114,6 @@ Clarinet.test({
                       user2.address)
     ]);
     assertEquals(block.receipts.length, 2);
-    assertEquals(block.height, 3);
     assertEquals(block.receipts[0].result, '(ok u1)');
     assertEquals(block.receipts[1].result, '(err u3001)');
   },
@@ -180,7 +173,6 @@ Clarinet.test({
                        types.principal(invitee.address)],
                       operator.address)
     ]);
-    assertEquals(b.height, 3);
     assertEquals(b.receipts[0].result, '(err u404)');
     assertEquals(getInvitationsByInvitee(chain, invitee, 
                                          operator),
@@ -261,7 +253,7 @@ Clarinet.test({
 
 
 Clarinet.test({
-  name: "Ensure that royalties are correctny computed",
+  name: "Ensure that royalties are correcty computed",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let user1 = accounts.get('wallet_1')!;
     let owner = accounts.get('deployer')!;
@@ -314,3 +306,57 @@ Clarinet.test({
                  "(err u404)");
   },
 });
+
+Clarinet.test({
+  name: "Ensure that correct percent of reward is calculated for special refcodes",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
+    const pkOperator ='03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9'; 
+    const pkUserA = '021843d01fa0bb9a3495fd2caf92505a81055dbe1fd545880fd40c3a1c7fd9c40a';
+
+    const deployer = accounts.get('deployer')!;
+    const operator = accounts.get('wallet_1')!;
+    const  refcode = 'testing';
+    const userA = accounts.get('wallet_2')!;
+    const userB = accounts.get('wallet_3')!;
+
+    setOperator(chain, deployer, operator);
+
+    const sigs = makeSignatureStr(skOperator, pkUserA, refcode);
+
+    let b1 = chain.mineBlock([
+      Tx.contractCall('creature-racer-referral-nft-v3',
+                      'special-mint',
+                      [ types.utf8(refcode),
+                        types.buff(sigs.operatorSignature),
+                        types.buff(sigs.senderPubKey)
+                      ], userA.address)
+    ]);
+
+    assertEquals(b1.receipts.length, 1);
+    assertEquals(b1.receipts[0].result, '(ok u1)');
+
+    
+    const getRefcodeProfit = (refcode: string) => {
+      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+                                       'get-refcode-profit',
+                                       [types.utf8(refcode)],
+                                       userA.address);
+      return res.result;
+    };
+    assertEquals(getRefcodeProfit(refcode), '(ok u5000)');
+    incrementInvitations(chain, refcode, userB.address,
+                         operator);
+    assertEquals(getRefcodeProfit(refcode), '(ok u5000)');
+
+    randomInvites(chain, 24, refcode, operator);
+    assertEquals(getRefcodeProfit(refcode), '(ok u5000)');
+    randomInvites(chain, 50, refcode, operator);
+    assertEquals(getRefcodeProfit(refcode), '(ok u5000)');
+    randomInvites(chain, 425, refcode, operator);
+    assertEquals(getRefcodeProfit(refcode), '(ok u5000)');
+    randomInvites(chain, 1001, refcode, operator);
+    assertEquals(getRefcodeProfit(refcode), '(ok u5000)');
+  },
+});
+

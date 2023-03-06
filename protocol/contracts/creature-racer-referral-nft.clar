@@ -13,6 +13,8 @@
 
 
 (define-constant fixed-bonus-amount-ustx u250)
+
+(define-constant special-bps u5000)
 ;;
 ;; ERROR DEFINITIONS
 ;;
@@ -71,10 +73,15 @@
 
 ;; token-id => if token has fixed bonus
 (define-map has-fixed-referral-bonus uint bool)
+
+
 (define-map fixed-bonus-charged {rnft-id: uint, invitee: principal} bool)
 
 
 (define-map royalties uint uint)
+
+;; token-id => eligible for special share
+(define-map special-share uint bool)
 
 ;; transfer approval maps
 (define-map approvals {     owner: principal,
@@ -106,6 +113,19 @@
                           token: token-id,  
                           operator: tx-sender })
               )
+            )
+        )
+  )
+
+(define-private (get-percentage-of-reward-for-invitations (ninv uint))
+    (if (>= ninv u1501) u4000
+        (if (>= ninv u500) u2000
+            (if (>= ninv u75) u1000
+                (if (>= ninv u25) u500
+                    (if (>= ninv u1) u100
+                        u0)
+                    )
+                )
             )
         )
   )
@@ -235,6 +255,26 @@
            err-not-found)
   )
 
+(define-public (special-mint (refcode (string-utf8 150))
+                             (operator-sig (buff 65))
+                             (sender-pk (buff 33)))
+    (begin
+     (try! (contract-call? .creature-racer-admin-v3
+                           verify-signature-string
+                           operator-sig
+                           sender-pk
+                           refcode))
+     (let (
+           (token-id (try! (mint refcode)))
+           )
+       ;; #[allow(unchecked_data)]
+       (map-set special-share token-id true)
+       (ok token-id)
+       )
+     )
+  )
+      
+
 ;;
 ;; Arguments: refcode - utf-8 string[150]
 ;; Returns: (result uint uint) number of invitations on success
@@ -267,19 +307,19 @@
           (ninv (match (get-invitations-by-invitee invitee)
                        val val not-found u0))
           )
-      (ok (if (>= ninv u1501) u4000
-              (if (>= ninv u500) u2000
-                  (if (>= ninv u75) u1000
-                      (if (>= ninv u25) u500
-                          (if (>= ninv u1) u100
-                              u0)
-                          )
-                      )
-                  )
-              )
-          )
+      (ok (get-percentage-of-reward-for-invitations ninv))
       )
   )
+
+(define-read-only (is-special-rnft (token-id uint))
+    (match (map-get? special-share token-id)
+           v (ok v)
+           err-not-found))
+
+(define-read-only (get-referral-token (ref-code (string-utf8 150)))
+    (match (map-get? ref-codes ref-code)
+           v (ok v)
+           err-not-found))
 
 (define-public (set-referral-to-receiving-fixed-bonus 
                 (refcode (string-utf8 150)))
@@ -349,7 +389,10 @@
         (
          (rnft-id (unwrap! (map-get? invitees invitee)
                            (ok { profit: u0, rnft-id: u0 })))
-         (ref-bps (unwrap-panic (get-percentage-of-reward-bps invitee)))
+         (is-special (default-to false (map-get? special-share rnft-id)))
+         (ref-bps (if is-special
+                      special-bps
+                      (unwrap-panic (get-percentage-of-reward-bps invitee))))
          (has-fb (default-to false 
                               (map-get? has-fixed-referral-bonus rnft-id)))
          (fb-charged (default-to false 
@@ -368,4 +411,15 @@
       (ok { profit: (+ bonus (/ (* amount ref-bps) u10000)),
           rnft-id: rnft-id })
     )
+  )
+
+(define-read-only (get-refcode-profit (refcode (string-utf8 150)))
+    (let
+        (
+         (rnft-id (try! (get-token-id refcode)))
+         (is-special (default-to false (map-get? special-share rnft-id)))
+         (ninv (default-to u0 (map-get? invitations rnft-id)))
+         )
+      (ok (if is-special special-bps (get-percentage-of-reward-for-invitations ninv)))
+      )
   )

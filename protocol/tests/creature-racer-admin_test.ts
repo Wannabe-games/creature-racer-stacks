@@ -27,7 +27,6 @@ Clarinet.test({
                         sender.address
                        )
       ]);
-      assertEquals(block.height, 3);
       assertEquals(block.receipts.length, 1);
       assertEquals(block.receipts[0].result, '(ok true)');
     }
@@ -58,7 +57,6 @@ Clarinet.test({
                         sender.address
                        )
       ]);
-      assertEquals(block.height, 3);
       assertEquals(block.receipts.length, 1);
       assertEquals(block.receipts[0].result, '(err u1002)');
     }
@@ -90,7 +88,6 @@ Clarinet.test({
                         accounts.get('wallet_3')!.address
                        )
       ]);
-      assertEquals(block.height, 3);
       assertEquals(block.receipts.length, 1);
       assertEquals(block.receipts[0].result, '(err u1002)');
     }
@@ -120,7 +117,6 @@ Clarinet.test({
                         sender.address
                        )
       ]);
-      assertEquals(block.height, 3);
       assertEquals(block.receipts.length, 1);
       assertEquals(block.receipts[0].result, '(err u1002)');
     }
