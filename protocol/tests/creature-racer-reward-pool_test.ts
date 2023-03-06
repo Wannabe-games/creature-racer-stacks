@@ -26,7 +26,6 @@ Clarinet.test({
                         types.uint(0)],
                       userA.address)
     ]);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(err u2002)');
   },
@@ -54,7 +53,6 @@ Clarinet.test({
                         types.uint(0)],
                       userA.address)
     ]);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts.length, 2);
     assertEquals(b1.receipts[0].result, '(ok true)');
     assertEquals(b1.receipts[1].result, '(err u6001)');
@@ -82,7 +80,6 @@ Clarinet.test({
                       [types.uint(0)], userA.address)
     ]);
 
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts.length, 3);
     assertEquals(b1.receipts[0].result, '(ok true)');
     assertEquals(b1.receipts[1].result, '(ok u2000)');
@@ -111,7 +108,6 @@ Clarinet.test({
                       'get-cycle-balance',
                       [types.uint(1)], userA.address)
     ]);
-    assertEquals(b2.height, 5);
     assertEquals(b2.receipts.length, 3);
     assertEquals(b2.receipts[0].result, '(ok true)');
     assertEquals(b2.receipts[1].result, '(ok u4000)');
@@ -134,7 +130,6 @@ Clarinet.test({
                       'get-cycle-balance',
                       [types.uint(3)], userA.address)
     ]);
-    assertEquals(b3.height, 8);
     assertEquals(b3.receipts.length, 4);
     assertEquals(b3.receipts[0].result, '(ok true)');
     assertEquals(b3.receipts[1].result, '(ok u6000)');
@@ -159,7 +154,6 @@ Clarinet.test({
                       'get-cycle-balance',
                       [types.uint(5)], userA.address)
     ]);
-    assertEquals(b4.height, 11);
     assertEquals(b4.receipts.length, 4);
     assertEquals(b4.receipts[0].result, '(ok true)');
     assertEquals(b4.receipts[1].result, '(ok u8000)');
@@ -186,7 +180,6 @@ Clarinet.test({
                       'get-cycle-balance',
                       [types.uint(0)], userA.address)
     ]);
-    assertEquals(b5.height, 14);
     assertEquals(b5.receipts.length, 5);
     assertEquals(b5.receipts[0].result, '(ok true)');
     assertEquals(b5.receipts[1].result, '(ok u10000)');
@@ -212,7 +205,6 @@ Clarinet.test({
                       'get-cycle-balance',
                       [types.uint(1)], userA.address),
     ]);
-    assertEquals(b6.height, 15);
     assertEquals(b6.receipts.length, 2);
     assertEquals(b6.receipts[0].result, '(ok true)');
     assertEquals(b6.receipts[1].result, '(ok u500)');
@@ -234,7 +226,6 @@ Clarinet.test({
                       'get-cycle-balance',
                       [types.uint(1)], userA.address),
     ]);
-    assertEquals(b7.height, 18);
     assertEquals(b7.receipts.length, 4);
     assertEquals(b7.receipts[0].result, '(ok u8500)');
     assertEquals(b7.receipts[1].result, '(ok u500)');

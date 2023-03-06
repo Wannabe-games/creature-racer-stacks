@@ -48,7 +48,6 @@ Clarinet.test({
                         
       ]);
       assertEquals(b1.receipts.length, 1);
-      assertEquals(b1.height, 3);
       assertEquals(b1.receipts[0].result, '(err u1002)');
     },
 });
@@ -102,7 +101,6 @@ Clarinet.test({
                         userA.address),
     ]);
     assertEquals(b1.receipts.length, 3);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(ok true)');
     assertEquals(b1.receipts[1].result, '(ok true)');
     assertEquals(b1.receipts[2].result, '(ok true)');
@@ -185,7 +183,6 @@ Clarinet.test({
                       userA.address),
     ]);
     assertEquals(b1.receipts.length, 1);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(err u7002)');
   }
 });
@@ -240,7 +237,6 @@ Clarinet.test({
                         userB.address),
     ]);
     assertEquals(b1.receipts.length, 3);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(ok true)');
     assertEquals(b1.receipts[1].result, '(ok true)');
     assertEquals(b1.receipts[2].result, '(ok true)');

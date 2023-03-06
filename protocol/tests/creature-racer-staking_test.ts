@@ -409,7 +409,7 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 3, 0] as const;
+      const nftParams = [1, 1, 1, 1, 1, 1, 1, 4, 0] as const;
 
       mintCreature(chain, uA, nftParams);
 

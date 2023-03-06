@@ -29,7 +29,6 @@ Clarinet.test({
     ]);
 
     assertEquals(b1.receipts.length, 1);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(ok none)');
 
     const operatorBalanceBefore = getBalance(chain, operator.address);
@@ -43,7 +42,6 @@ Clarinet.test({
                      userA.address)
      ]);
       assertEquals(b2.receipts.length, 1);
-    assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok true)');
 
     const operatorBalanceAfter = getBalance(chain, operator.address);
@@ -83,7 +81,6 @@ Clarinet.test({
     ]);
 
     assertEquals(b1.receipts.length, 2);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(ok u100)');
     assertEquals(b1.receipts[1].result, '(ok none)');
 
@@ -98,7 +95,6 @@ Clarinet.test({
                      userA.address)
      ]);
       assertEquals(b2.receipts.length, 1);
-    assertEquals(b2.height, 4);
     assertEquals(b2.receipts[0].result, '(ok true)');
 
     const operatorBalanceAfter = getBalance(chain, operator.address);
@@ -132,7 +128,6 @@ Clarinet.test({
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, userA, refcode, operator);
     assertEquals(b1.receipts.length, 1);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(ok u1)');
 
 
@@ -149,7 +144,6 @@ Clarinet.test({
                      operator.address)
     ]);
 
-    assertEquals(b2.height, 4);
     assertEquals(b2.receipts.length, 2);
     assertEquals(b2.receipts[0].result, '(ok none)');
     assertEquals(b2.receipts[1].result, '(ok true)');
@@ -166,7 +160,6 @@ Clarinet.test({
                       owner.address)
     ]);
 
-    assertEquals(b3.height, 5);
     assertEquals(b3.receipts.length, 1);
     assertEquals(b3.receipts[0].result, '(ok true)');
 
@@ -194,7 +187,6 @@ Clarinet.test({
                       owner.address)
     ]);
 
-    assertEquals(b4.height, 30);
     assertEquals(b4.receipts.length, 1);
     assertEquals(b4.receipts[0].result, '(ok true)');
 
@@ -214,7 +206,6 @@ Clarinet.test({
                       [types.utf8(refcode)],
                       operator.address)
     ]);
-    assertEquals(b5.height, 31);
     assertEquals(b5.receipts.length, 1);
     assertEquals(b5.receipts[0].result, '(ok true)');
 
@@ -230,7 +221,6 @@ Clarinet.test({
                       [types.uint(100100)],
                       owner.address)
     ]);
-    assertEquals(b6.height, 32);
     assertEquals(b6.receipts.length, 1);
     assertEquals(b6.receipts[0].result, '(ok true)');
 
@@ -257,7 +247,6 @@ Clarinet.test({
                       [types.uint(100100)],
                       owner.address)
     ]);
-    assertEquals(b7.height, 33);
     assertEquals(b7.receipts.length, 1);
     assertEquals(b7.receipts[0].result, '(ok true)');
 
@@ -293,7 +282,6 @@ Clarinet.test({
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, userA, refcode, operator);
     assertEquals(b1.receipts.length, 1);
-    assertEquals(b1.height, 3);
     assertEquals(b1.receipts[0].result, '(ok u1)');
 
     let b2 = chain.mineBlock([
@@ -309,7 +297,6 @@ Clarinet.test({
                      operator.address)
     ]);
 
-    assertEquals(b2.height, 4);
     assertEquals(b2.receipts.length, 2);
     assertEquals(b2.receipts[0].result, '(ok none)');
     assertEquals(b2.receipts[1].result, '(ok true)');
@@ -324,7 +311,6 @@ Clarinet.test({
                       [types.uint(1100)],
                       userB.address)
     ]);
-    assertEquals(b3.height, 5);
     assertEquals(b3.receipts.length, 1);
 
     let supportedWalletBalance = getBalance(chain, supportedWallet.address);

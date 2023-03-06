@@ -125,6 +125,36 @@
 (define-private (make-optional (val (buff 225)))
     (some val))
 
+(define-private (verify-signature-internal
+                 (operator-sig (buff 65))
+                 (sender-pk (buff 33))
+                 (argbuff (buff 800)))
+    (let (
+          (arghash (sha256 argbuff))
+          (sender (unwrap! (principal-of? sender-pk)
+                           err-invalid-signature))
+          (msgbuff (unwrap-panic (as-max-len?
+                                  (concat sender-pk argbuff)
+                                  u225)))
+          (msghash (sha256 msgbuff))
+          (operator-pk (unwrap! 
+                        (secp256k1-recover? msghash
+                                            operator-sig)
+                        err-invalid-signature))
+          (operator-principal (unwrap! 
+                               (principal-of? operator-pk)
+                               err-invalid-signature))
+          (cop (unwrap! (var-get operator)
+                        err-operator-unset))
+          )
+      (if (and (is-eq sender tx-sender)
+               (is-eq operator-principal cop))
+          (ok true)
+          err-invalid-signature)
+      )
+  )
+
+
 ;;
 ;; ================
 ;; PUBLIC FUNCTIONS
@@ -187,27 +217,21 @@
                               (map make-optional 
                                    (map uint-to-buff args))
                               none)))
-          (arghash (sha256 argbuff))
-          (sender (unwrap! (principal-of? sender-pk)
-                           err-invalid-signature))
-          (msgbuff (unwrap-panic (as-max-len?
-                                  (concat sender-pk argbuff)
-                                  u225)))
-          (msghash (sha256 msgbuff))
-          (operator-pk (unwrap! 
-                        (secp256k1-recover? msghash
-                                            operator-sig)
-                        err-invalid-signature))
-          (operator-principal (unwrap! 
-                               (principal-of? operator-pk)
-                               err-invalid-signature))
-          (cop (unwrap! (var-get operator)
-                        err-operator-unset))
-          )
-      (if (and (is-eq sender tx-sender)
-               (is-eq operator-principal cop))
-          (ok true)
-          err-invalid-signature)
+      )
+      (verify-signature-internal operator-sig sender-pk argbuff)
       )
 )
+
+(define-read-only (verify-signature-string
+                   (operator-sig (buff 65))
+                   (sender-pk (buff 33))
+                   (arg (string-utf8 150)))
+    (let (
+          (argbuff (unwrap-panic
+                    (to-consensus-buff? arg)))
+          )
+      (verify-signature-internal operator-sig sender-pk argbuff)
+      )
+  )
+          
 
