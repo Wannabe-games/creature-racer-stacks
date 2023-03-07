@@ -93,7 +93,7 @@ export function makeSignatureStr(operatorPK: string,
   const pkData = parseHexString(senderPK);
   const argBuff = Uint8Array.from(arg.split("").map(x => x.charCodeAt()));
   var buff = pkData;
-  buff = buff.concat(0xE);
+  buff = buff.concat(0xE); // CV type, 0xE means UTF-8 string
   buff = buff.concat(uint32toBytes(argBuff.length));
   for(var i = 0; i < argBuff.length; i++) {
     buff = buff.concat(argBuff[i]);

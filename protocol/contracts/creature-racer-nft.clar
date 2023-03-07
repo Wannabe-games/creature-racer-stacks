@@ -207,7 +207,6 @@
                      (type-id (buff 1))
                      (parts (buff 5))
                      (expiry uint)
-                     (price uint)
                      (operator-sig (buff 65))
                      (sender-pk (buff 33)))
     (let (
@@ -224,12 +223,7 @@
                          (list nft-id
                                (byte-to-uint type-id))
                          unpacked-parts)
-                        (list expiry price))))
-      (if (> price u0)
-          (try!
-           (contract-call? .creature-racer-payment-v3
-                           receive-funds  
-                           price)) true)
+                        (list expiry))))
       (let
           (
            (block-time (get-block-time))

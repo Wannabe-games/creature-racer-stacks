@@ -16,7 +16,6 @@ export function mintCreature(chain: Chain, user: Identity,
                                   nftParams[4],nftParams[5],
                                   nftParams[6]]),
                       types.uint(nftParams[7]),
-                      types.uint(nftParams[8]),
                       types.buff(sigs.operatorSignature),
                       types.buff(sigs.senderPubKey) ],
                     user.address)
