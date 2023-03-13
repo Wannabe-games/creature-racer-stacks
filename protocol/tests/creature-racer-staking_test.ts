@@ -49,7 +49,7 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 1, 1, 1, 1, 1, 1, 100];
+    const nftParams = [1, 1, 1, 1, 1, 1, 1, 100, 0];
     mintCreature(chain, uB, nftParams);
     
     let b1 = chain.mineBlock([
@@ -71,7 +71,7 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 1, 1, 1, 1, 1, 1, 100];
+    const nftParams = [1, 1, 1, 1, 1, 1, 1, 100, 0];
     mintCreature(chain, uA, nftParams);
     
     let b1 = chain.mineBlock([
@@ -94,7 +94,7 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 7, 1, 4, 3, 5, 4, 100];
+    const nftParams = [1, 7, 1, 4, 3, 5, 4, 100, 1000];
     mintCreature(chain, uA, nftParams);
       
     let b1 = chain.mineBlock([
@@ -148,6 +148,7 @@ creatures.forEach(creature => {
         creature.data[4],
         creature.data[5],
         10000,
+        0,
       ] as const;
       const deployer = accounts.get('deployer')!;
       const operator = accounts.get('wallet_1')!;
@@ -186,7 +187,7 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000] as const;
+      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
@@ -281,7 +282,7 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000] as const;
+      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
@@ -316,7 +317,7 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000] as const;
+      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
@@ -350,7 +351,7 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000] as const;
+      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
       const stakingContractAddr = deployer.address + 
         '.creature-racer-staking-v3';
 
@@ -408,7 +409,7 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 4] as const;
+      const nftParams = [1, 1, 1, 1, 1, 1, 1, 4, 0] as const;
 
       mintCreature(chain, uA, nftParams);
 
