@@ -81,7 +81,7 @@ Clarinet.test({
     ]);
 
     assertEquals(b1.receipts.length, 2);
-    assertEquals(b1.receipts[0].result, '(ok u100)');
+    assertEquals(b1.receipts[0].result, '(ok u10)');
     assertEquals(b1.receipts[1].result, '(ok none)');
 
     const operatorBalanceBefore = getBalance(chain, operator.address);
@@ -91,10 +91,10 @@ Clarinet.test({
     let b2 = chain.mineBlock([
       Tx.contractCall('creature-racer-payment-v3',
                       'receive-funds',
-                      [types.uint(10)],
+                      [types.uint(100)],
                      userA.address)
      ]);
-      assertEquals(b2.receipts.length, 1);
+    assertEquals(b2.receipts.length, 1);
     assertEquals(b2.receipts[0].result, '(ok true)');
 
     const operatorBalanceAfter = getBalance(chain, operator.address);
@@ -103,9 +103,9 @@ Clarinet.test({
     
     assertEquals(operatorBalanceAfter - operatorBalanceBefore, 2);
     assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore,
-                 4);
+                 49);
     assertEquals(supportedBalanceAfter - supportedBalanceBefore,
-                 4);
+                 49);
   }
 });
 
@@ -168,10 +168,10 @@ Clarinet.test({
     let referralPoolBalanceAfter = getBalance(chain, referralPoolAddress);
     let supportedWalletBalanceAfter = getBalance(chain, supportedWallet.address);
 
-    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 100);
-    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 49500);
-    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 1000);
-    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 49500);
+    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 10010);
+    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 44595);
+    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 900);
+    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 44595);
 
     randomInvites(chain, 24, refcode, operator);
 
@@ -195,10 +195,10 @@ Clarinet.test({
     referralPoolBalanceAfter = getBalance(chain, referralPoolAddress);
     supportedWalletBalanceAfter = getBalance(chain, supportedWallet.address);
   
-    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 100);
-    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 47500);
-    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 47500);
-    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 5000);
+    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 10010);
+    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 42793);
+    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 42793);
+    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 4504);
 
     let b5 = chain.mineBlock([
       Tx.contractCall('creature-racer-referral-nft-v3',
@@ -229,10 +229,10 @@ Clarinet.test({
     referralPoolBalanceAfter = getBalance(chain, referralPoolAddress);
     supportedWalletBalanceAfter = getBalance(chain, supportedWallet.address);
   
-    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 100);
-    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 47375);
-    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 47375);
-    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 5250);
+    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 10010);
+    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 42668);
+    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 42668);
+    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 4754);
 
 
     operatorBalanceBefore = getBalance(chain, operator.address);
@@ -256,10 +256,10 @@ Clarinet.test({
     referralPoolBalanceAfter = getBalance(chain, referralPoolAddress);
     supportedWalletBalanceAfter = getBalance(chain, supportedWallet.address);
   
-    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 100);
-    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 47500);
-    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 47500);
-    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 5000);
+    assertEquals(operatorBalanceAfter - operatorBalanceBefore, 10010);
+    assertEquals(rewardPoolBalanceAfter - rewardPoolBalanceBefore, 42793);
+    assertEquals(supportedWalletBalanceAfter - supportedWalletBalanceBefore, 42793);
+    assertEquals(referralPoolBalanceAfter - referralPoolBalanceBefore, 4504);
 
 
   }
@@ -316,6 +316,6 @@ Clarinet.test({
     let supportedWalletBalance = getBalance(chain, supportedWallet.address);
 
     assertEquals(supportedWalletBalance - supportedWalletBalanceBefore,
-                 495);
+                 490);
   },
 });

@@ -21,6 +21,7 @@
 (define-constant err-operator-unset (err u1001))
 (define-constant err-insufficient-amount (err u2001))
 (define-constant err-unknown-transfer-error (err u2003))
+(define-constant err-invalid-value (err u6002))
 
 
 ;;
@@ -39,9 +40,9 @@
 ;; Deposit split
 ;; -------------
 
-;; operator's share in every deposit, defaults
-;; to 100uSTX
-(define-data-var portion-for-operator uint u100)
+;; percent of stx to be transferred to operator's wallet
+;; defaults to 10%
+(define-data-var portion-for-operator uint u10)
 
 ;; percent of stx to be transferred to supported wallet
 (define-data-var percent-for-supported-wallet uint u0)
@@ -79,11 +80,12 @@
                   (contract-call? .creature-racer-admin-v3
                                   get-operator)
                   err-operator-unset) err-operator-unset))
-          
-          (operator-income (var-get portion-for-operator))
+          (operator-share (var-get portion-for-operator))
+          (operator-income (/ (* amount-ustx operator-share)
+                              u100))
           (supported-maybe (var-get supported-wallet))
           )
-      (asserts! (> amount-ustx operator-income) 
+      (asserts! (> operator-income u0)
                 err-insufficient-amount)
       (let (
             (portion-for-reward-pool 
@@ -151,15 +153,17 @@
 ;; each receive-funds amount.
 ;; 
 ;; Arguments:
-;;  amount: microSTX to be deducted from each payment and transferred
-;;          to operator account.
+;;   share: percent of the transaction to be deducted from each payment
+;;          and transferred to operator account.
 ;; Returns:
 ;;  (result uint uint): previous value
-(define-public (set-portion-for-operator (amount uint))
+(define-public (set-portion-for-operator (share uint))
     (let ((old-portion (var-get portion-for-operator)))
       (asserts! (is-eq tx-sender contract-owner) err-forbidden)
+      (asserts! (>= share u0) err-invalid-value)
+      (asserts! (< share u100) err-invalid-value)
       ;; #[allow(unchecked_data)]
-      (var-set portion-for-operator amount)
+      (var-set portion-for-operator share)
       (ok old-portion)
       )
 )
