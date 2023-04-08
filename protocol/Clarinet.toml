@@ -7,37 +7,37 @@ cache_dir = '.cache'
 
 [[project.requirements]]
 contract_id = 'SP2PABAF9FTAJYNFZH93XENAJ8FVY99RRM50D2JG9.nft-trait'
-[contracts.creature-racer-admin-v3]
+[contracts.creature-racer-admin-v4]
 path = 'contracts/creature-racer-admin.clar'
 clarity_version = 2
 epoch = 2.1
 
-[contracts.creature-racer-nft-v3]
+[contracts.creature-racer-nft-v4]
 path = 'contracts/creature-racer-nft.clar'
 clarity_version = 2
 epoch = 2.1
 
-[contracts.creature-racer-payment-v3]
+[contracts.creature-racer-payment-v4]
 path = 'contracts/creature-racer-payment.clar'
 clarity_version = 2
 epoch = 2.1
 
-[contracts.creature-racer-referral-nft-v3]
+[contracts.creature-racer-referral-nft-v4]
 path = 'contracts/creature-racer-referral-nft.clar'
 clarity_version = 2
 epoch = 2.1
 
-[contracts.creature-racer-referral-pool-v3]
+[contracts.creature-racer-referral-pool-v4]
 path = 'contracts/creature-racer-referral-pool.clar'
 clarity_version = 2
 epoch = 2.1
 
-[contracts.creature-racer-reward-pool-v3]
+[contracts.creature-racer-reward-pool-v4]
 path = 'contracts/creature-racer-reward-pool.clar'
 clarity_version = 2
 epoch = 2.1
 
-[contracts.creature-racer-staking-v3]
+[contracts.creature-racer-staking-v4]
 path = 'contracts/creature-racer-staking.clar'
 clarity_version = 2
 epoch = 2.1

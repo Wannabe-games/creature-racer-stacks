@@ -18,7 +18,7 @@ Clarinet.test({
                                   // call arguments follow
                                   500, 531101);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v3',
+        Tx.contractCall('creature-racer-admin-v4',
                         'verify-signature',
                         [types.buff(sig.operatorSignature),
                          types.buff(sig.senderPubKey),
@@ -48,7 +48,7 @@ Clarinet.test({
                                   // call arguments follow
                                   500, 531101);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v3',
+        Tx.contractCall('creature-racer-admin-v4',
                         'verify-signature',
                         [types.buff(sigs.operatorSignature),
                          types.buff(sigs.senderPubKey),
@@ -79,7 +79,7 @@ Clarinet.test({
                                   // call arguments follow
                                   500, 531101);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v3',
+        Tx.contractCall('creature-racer-admin-v4',
                         'verify-signature',
                         [types.buff(sigs.operatorSignature),
                          types.buff(sigs.senderPubKey),
@@ -108,7 +108,7 @@ Clarinet.test({
                                   // call arguments follow
                                   500, 531101);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v3',
+        Tx.contractCall('creature-racer-admin-v4',
                         'verify-signature',
                         [types.buff(sigs.operatorSignature),
                          types.buff(sigs.senderPubKey),

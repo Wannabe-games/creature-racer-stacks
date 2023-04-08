@@ -15,7 +15,7 @@ const pkOperator = '03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb6
 const pkUserA =  '021843d01fa0bb9a3495fd2caf92505a81055dbe1fd545880fd40c3a1c7fd9c40a';
 const pkUserB = '02c4b5eacb71a27be633ed970dcbc41c00440364bc04ba38ae4683ac24e708bf33';
  
-const nftClass = '.creature-racer-nft-v3.creature-racer-creature-nft';
+const nftClass = '.creature-racer-nft-v4.creature-racer-creature-nft';
 
 Clarinet.test({
     name: "Ensure that it refuses mint token with wrong params",
@@ -36,7 +36,7 @@ Clarinet.test({
                                   ...nftParams);      
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v3', 'mint',
+        Tx.contractCall('creature-racer-nft-v4', 'mint',
                         [ types.uint(1),
                           types.buff([1]), 
                           types.buff([1,1,1,1,1]),
@@ -72,7 +72,7 @@ Clarinet.test({
                               3, 21, 4, 4, 4, 4, 4, expiry, 500);
     
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(1),
                         types.buff([1]), 
                         types.buff([1,1,1,1,1]),
@@ -81,7 +81,7 @@ Clarinet.test({
                         types.buff(s1.operatorSignature),
                         types.buff(s1.senderPubKey) ],
                         operator.address),
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(2),
                         types.buff([2]), 
                         types.buff([5,5,5,3,2]),
@@ -90,7 +90,7 @@ Clarinet.test({
                         types.buff(s2.operatorSignature),
                         types.buff(s2.senderPubKey) ],
                         userA.address),
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(3),
                         types.buff([21]), 
                         types.buff([4,4,4,4,4]),
@@ -105,19 +105,19 @@ Clarinet.test({
     assertEquals(b1.receipts[1].result, '(ok true)');
     assertEquals(b1.receipts[2].result, '(ok true)');
     
-    const c1 = chain.callReadOnlyFn('creature-racer-nft-v3',
+    const c1 = chain.callReadOnlyFn('creature-racer-nft-v4',
                                     'get-creature-data',
                                     [types.uint(1)],
                                     userA.address);
     assertEquals(c1.result, '(ok 0x010101010101)');
     
-    const c2 = chain.callReadOnlyFn('creature-racer-nft-v3',
+    const c2 = chain.callReadOnlyFn('creature-racer-nft-v4',
                                     'get-creature-data',
                                     [types.uint(2)],
                                     userA.address);
     assertEquals(c2.result, '(ok 0x020505050302)');
     
-    const c3 = chain.callReadOnlyFn('creature-racer-nft-v3',
+    const c3 = chain.callReadOnlyFn('creature-racer-nft-v4',
                                     'get-creature-data',
                                     [types.uint(3)],
                                     userA.address);
@@ -131,25 +131,25 @@ Clarinet.test({
     const userA = accounts.get('wallet_2')!;
 
 
-    var res = chain.callReadOnlyFn('creature-racer-nft-v3',
+    var res = chain.callReadOnlyFn('creature-racer-nft-v4',
                                    'get-mint-cap',
                                    [ types.buff([5,5,5,5,5]) ],
                                    userA.address);
     assertEquals(res.result, '(ok u32)');
     
-    res = chain.callReadOnlyFn('creature-racer-nft-v3',
+    res = chain.callReadOnlyFn('creature-racer-nft-v4',
                                'get-mint-cap',
                                [ types.buff([1,1,1,1,1]) ],
                                userA.address);
     assertEquals(res.result, '(ok u100000)');
     
-    res = chain.callReadOnlyFn('creature-racer-nft-v3',
+    res = chain.callReadOnlyFn('creature-racer-nft-v4',
                                'get-mint-cap',
                                [ types.buff([5,5,5,2,1]) ],
                                userA.address);
     assertEquals(res.result, '(ok u640)');
 
-    res = chain.callReadOnlyFn('creature-racer-nft-v3',
+    res = chain.callReadOnlyFn('creature-racer-nft-v4',
                                'get-mint-cap',
                                [ types.buff([5,1,3,5,5]) ],
                                userA.address);
@@ -172,7 +172,7 @@ Clarinet.test({
                                33, 16, 5, 5, 5, 5, 5, 0, 0);
 
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(33),
                         types.buff([16]),
                         types.buff([5,5,5,5,5]),
@@ -208,7 +208,7 @@ Clarinet.test({
                               3, 21, 4, 4, 4, 4, 4, expiry, 500);
     
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(1),
                         types.buff([1]), 
                         types.buff([1,1,1,1,1]),
@@ -217,7 +217,7 @@ Clarinet.test({
                         types.buff(s1.operatorSignature),
                         types.buff(s1.senderPubKey) ],
                         userA.address),
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(2),
                         types.buff([2]), 
                         types.buff([5,5,5,3,2]),
@@ -226,7 +226,7 @@ Clarinet.test({
                         types.buff(s2.operatorSignature),
                         types.buff(s2.senderPubKey) ],
                         userA.address),
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(3),
                         types.buff([21]), 
                         types.buff([4,4,4,4,4]),
@@ -242,7 +242,7 @@ Clarinet.test({
     assertEquals(b1.receipts[2].result, '(ok true)');
     
     const am = chain.getAssetsMaps();
-    const nft_addr = ".creature-racer-nft-v3.creature-racer-creature-nft";
+    const nft_addr = ".creature-racer-nft-v4.creature-racer-creature-nft";
     assertEquals(am.assets[nft_addr][userA.address], 2);
     assertEquals(am.assets[nft_addr][userB.address], 1);
   }
@@ -272,7 +272,7 @@ Clarinet.test({
                           types.buff(sigs.senderPubKey) ];
       const b1 = chain.mineBlock([
         Tx.transferSTX(10, ri.address, operator.address),
-        Tx.contractCall('creature-racer-nft-v3', 'mint',
+        Tx.contractCall('creature-racer-nft-v4', 'mint',
                         args, ri.address)
       ]);
 
@@ -284,7 +284,7 @@ Clarinet.test({
                               33, 16, 5, 5, 5, 5, 5,
                               expiry, 0);
     const b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(33), types.buff([16]),
                         types.buff([5,5,5,5,5]),
                         types.uint(expiry),
@@ -309,7 +309,7 @@ Clarinet.test({
                      types.buff(sigs.senderPubKey)];
       const b3 = chain.mineBlock([
         Tx.transferSTX(10, ri.address, operator.address),
-        Tx.contractCall('creature-racer-nft-v3', 'mint',
+        Tx.contractCall('creature-racer-nft-v4', 'mint',
                         args, ri.address)
       ]);
       assertEquals(b3.receipts.length, 2);
@@ -320,7 +320,7 @@ Clarinet.test({
                               80, 4, 5, 5, 5, 5, 5,
                               expiry, 0);
     const b4 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(80), types.buff([4]),
                         types.buff([5,5,5,5,5]),
                         types.uint(expiry),
@@ -350,7 +350,7 @@ Clarinet.test({
                                123, 4, 3, 3, 3, 5, 2,
                                4, 0);
     const b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(123),
                         types.buff([4]),
                         types.buff([3,3,3,5,2]),
@@ -363,13 +363,13 @@ Clarinet.test({
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(ok true)');
 
-    const b2 = chain.callReadOnlyFn('creature-racer-nft-v3',
+    const b2 = chain.callReadOnlyFn('creature-racer-nft-v4',
                                     'is-expired',
                                     [ types.uint(123) ],
                                     userA.address);
     assertEquals(b2.result, '(ok false)');
     chain.mineEmptyBlockUntil(7);
-    const b3 = chain.callReadOnlyFn('creature-racer-nft-v3',
+    const b3 = chain.callReadOnlyFn('creature-racer-nft-v4',
                                     'is-expired',
                                     [ types.uint(123) ],
                                     userA.address);
@@ -394,7 +394,7 @@ Clarinet.test({
                                10, 20, 1, 1, 1, 1, 1,
                                1000, 0);
     const b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v3', 'mint',
+      Tx.contractCall('creature-racer-nft-v4', 'mint',
                       [ types.uint(10),
                         types.buff([20]),
                         types.buff([1,1,1,1,1]),
@@ -403,7 +403,7 @@ Clarinet.test({
                         types.buff(sgn.operatorSignature),
                         types.buff(sgn.senderPubKey) ],
                       userA.address),
-      Tx.contractCall('creature-racer-nft-v3', 'set-royalty',
+      Tx.contractCall('creature-racer-nft-v4', 'set-royalty',
                       [types.uint(10), types.uint(100)],
                       userB.address)
     ]);
@@ -427,7 +427,7 @@ Clarinet.test({
     
     setOperator(chain, deployer, operator);
 
-    const res = chain.callReadOnlyFn('creature-racer-nft-v3',
+    const res = chain.callReadOnlyFn('creature-racer-nft-v4',
                                      'royalty-info', 
                                      [types.uint(1),
                                       types.uint(1000)],
@@ -521,7 +521,7 @@ Clarinet.test({
     const deployer = accounts.get('deployer')!;
     const operator = accounts.get('wallet_1')!;
     const stakingContract = {
-      address: deployer.address + '.creature-racer-staking-v3'
+      address: deployer.address + '.creature-racer-staking-v4'
     };
 
     setOperator(chain, deployer, operator);
@@ -529,7 +529,7 @@ Clarinet.test({
     approveTransfer(chain, 1, uA, stakingContract.address);
     
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-staking-v3',
+      Tx.contractCall('creature-racer-staking-v4',
                       'enter-staking',
                       [ types.uint(1) ],
                       uA.address)

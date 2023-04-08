@@ -82,7 +82,7 @@ function sign(buffer, key) {
          makeStandardSTXPostCondition(
              stxAddress, FungibleConditionCode.LessEqual, '50000'),
          makeContractSTXPostCondition(
-             contractAddress, 'creature-racer-payment-v3',
+             contractAddress, 'creature-racer-payment-v4',
              FungibleConditionCode.LessEqual,
              '50000')
      ];
@@ -102,7 +102,7 @@ function sign(buffer, key) {
 
      openContractCall({
          contractAddress: contractAddress,
-         contractName: 'creature-racer-nft-v3',
+         contractName: 'creature-racer-nft-v4',
          functionName: 'mint',
          functionArgs: args,
          postConditions: postConds,

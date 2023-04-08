@@ -14,7 +14,7 @@ import { userA, userB } from './utils/chain.ts';
 function getInvitationsByInvitee(chain: Chain,
                                    user: Account,
                                    operator: Account) {
-  return chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+  return chain.callReadOnlyFn('creature-racer-referral-nft-v4',
                               'get-invitations-by-invitee',
                               [types.principal(user.address)],
                               operator.address).result;
@@ -23,7 +23,7 @@ function getInvitationsByInvitee(chain: Chain,
 function getInvitationsByRefCode(chain: Chain,
                                  refcode: string,
                                  operator: Account) {
-  return chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+  return chain.callReadOnlyFn('creature-racer-referral-nft-v4',
                               'get-invitations-by-ref-code',
                               [types.utf8(refcode)],
                               operator.address).result;
@@ -83,10 +83,10 @@ Clarinet.test({
     setOperator(chain, owner, operator);
     
     let block = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'mint', [types.utf8('ABCDE')],
                       user1.address),
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'mint', [types.utf8('ABCDE')],
                       user2.address)
     ]);
@@ -113,7 +113,7 @@ Clarinet.test({
     let b1 = mintRNFT(chain, user1, refcode);
 
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'increment-invitations',
                       [types.utf8(refcode), 
                        types.principal(invitee.address)],
@@ -144,7 +144,7 @@ Clarinet.test({
     let refcode = 'asd';
 
     let b = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'increment-invitations',
                       [types.utf8(refcode), 
                        types.principal(invitee.address)],
@@ -178,7 +178,7 @@ Clarinet.test({
     
     
     const getPercentageOfRewardBPS = (user: Account) => {
-      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
                                        'get-percentage-of-reward-bps',
                                        [types.principal(user.address)],
                                        user1.address);
@@ -216,7 +216,7 @@ Clarinet.test({
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'set-royalty',
                       [types.uint(1), 
                        types.uint(100)],
@@ -242,7 +242,7 @@ Clarinet.test({
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'set-royalty',
                       [types.uint(1), 
                        types.uint(100)],
@@ -251,7 +251,7 @@ Clarinet.test({
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.receipts[0].result, '(ok true)');
 
-    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
                                    'royalty-info',
                                    [types.uint(1),
                                     types.uint(10000)],
@@ -274,7 +274,7 @@ Clarinet.test({
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
-    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
                                    'royalty-info',
                                    [types.uint(1),
                                     types.uint(10000)],
@@ -302,7 +302,7 @@ Clarinet.test({
     const sigs = makeSignatureStr(skOperator, pkUserA, refcode);
 
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
+      Tx.contractCall('creature-racer-referral-nft-v4',
                       'special-mint',
                       [ types.utf8(refcode),
                         types.buff(sigs.operatorSignature),
@@ -315,7 +315,7 @@ Clarinet.test({
 
     
     const getRefcodeProfit = (refcode: string) => {
-      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v3',
+      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
                                        'get-refcode-profit',
                                        [types.utf8(refcode)],
                                        userA.address);

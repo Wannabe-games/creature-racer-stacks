@@ -71,7 +71,7 @@
                                           sender))
                    u1))
           )
-      (try! (contract-call? .creature-racer-admin-v3
+      (try! (contract-call? .creature-racer-admin-v4
                             verify-signature
                             operator-sig
                             sender-pk

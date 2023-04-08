@@ -17,7 +17,7 @@ const {
 const { StacksTestnet } = require("@stacks/network");
 
 const contractAddress = 'ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM';
-const stakingContractName = 'creature-racer-staking-v3';
+const stakingContractName = 'creature-racer-staking-v4';
 
 // Note that operator (i.e. backend) address needs to be first set
 // (see set-operator.js in examples/admin).
@@ -60,7 +60,7 @@ async function leaveStaking(nftId, ownerKey, ownerAddr) {
   // Create post conditions to allow transferring the
   // nft
   const postConditionCode = NonFungibleConditionCode.Sends;
-  const assetContractName = 'creature-racer-nft-v3';
+  const assetContractName = 'creature-racer-nft-v4';
   const assetName = 'creature-racer-creature-nft';
   const tokenAssetName = uintCV(nftId) ;
   const nonFungibleAssetInfo = createAssetInfo(contractAddress, 

@@ -261,7 +261,7 @@
                              (operator-sig (buff 65))
                              (sender-pk (buff 33)))
     (begin
-     (try! (contract-call? .creature-racer-admin-v3
+     (try! (contract-call? .creature-racer-admin-v4
                            verify-signature-string
                            operator-sig
                            sender-pk
@@ -328,7 +328,7 @@
     (let (
           (token-id (try! (get-token-id refcode)))
           )
-      (try! (contract-call? .creature-racer-admin-v3
+      (try! (contract-call? .creature-racer-admin-v4
                             assert-invoked-by-operator))
       ;; #[allow(unchecked_data)]
       (if (map-insert has-fixed-referral-bonus token-id true)
@@ -342,7 +342,7 @@
     (let (
           (token-id (try! (get-token-id refcode)))
           )
-     (try! (contract-call? .creature-racer-admin-v3
+     (try! (contract-call? .creature-racer-admin-v4
                            assert-invoked-by-operator))
      ;; #[allow(unchecked_data)]
      (map-set invitees invitee token-id)
