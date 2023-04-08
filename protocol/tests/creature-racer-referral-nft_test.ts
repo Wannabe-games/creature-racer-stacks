@@ -70,29 +70,6 @@ Clarinet.test({
 })
 
 
-Clarinet.test({
-  name: "Ensure that user can only mint a single rNFT",
-  async fn(chain: Chain, accounts: Map<string, Account>) {
-
-    let user = accounts.get('wallet_1')!;
-
-    let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_3')!;
-    setOperator(chain, owner, operator);
-
-    let block = mintRNFT(chain, user, 'ABCDE');
-
-    assertEquals(block.receipts.length, 1);
-    assertEquals(block.receipts[0].result, '(ok u1)');
-
-    block = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v3',
-                      'mint', [types.utf8('POELROA')],
-                      user.address)
-    ]);
-    assertEquals(block.receipts.length, 1);
-    assertEquals(block.receipts[0].result, '(err u3002)');
-  }});
 
 Clarinet.test({
   name: "Ensure that referral code can be used only once",

@@ -230,24 +230,26 @@
     (let (
           (recipient tx-sender)
           (your-token-id (+ (var-get last-token-id) u1))
+          (last-count (default-to u0 (map-get? rnft-count recipient)))
           )
       (asserts! (> (len refcode) u3) err-invalid-length)
 
       (if (is-none (map-get? ref-codes refcode))
           ;; #[allow(unchecked_data)]
-          (if (map-insert rnft-count recipient u1)
-              (begin
-               (map-insert first-owner your-token-id recipient)
-               (map-insert ref-codes refcode your-token-id)
-               (try! (nft-mint? creature-racer-referral-nft 
-                                your-token-id
-                                tx-sender))
-               (var-set last-token-id your-token-id)
-               (ok your-token-id)
-               ) err-rnft-already-granted)
+          (begin
+           (map-set rnft-count recipient (+ u1 last-count))
+           (map-insert first-owner your-token-id recipient)
+           (map-insert ref-codes refcode your-token-id)
+           (try! (nft-mint? creature-racer-referral-nft 
+                            your-token-id
+                            tx-sender))
+           (var-set last-token-id your-token-id)
+           (ok your-token-id)
+           )
           err-refcode-used)
       )
   )
+  
 
 (define-read-only (get-first-owner (token-id uint))
     (match (map-get? first-owner token-id)
