@@ -16,7 +16,7 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const poolAddr = deployer.address + 
-      '.creature-racer-referral-pool-v4';
+      '.creature-racer-referral-pool-v5';
 
     let b1 = chain.mineBlock([
       Tx.transferSTX(200, poolAddr, operator.address)
@@ -25,9 +25,9 @@ Clarinet.test({
 
     const before = getBalance(chain, uA.address);
     const sigs = makeSignature(skOperator, uA.publicKey,
-                                1,1);
+                               1n, 1n);
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-pool-v4',
+      Tx.contractCall('creature-racer-referral-pool-v5',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
                         types.buff(sigs.senderPubKey),
@@ -41,7 +41,7 @@ Clarinet.test({
     
     assertEquals(after - before, 1);
     let b3 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-pool-v4',
+      Tx.contractCall('creature-racer-referral-pool-v5',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
                         types.buff(sigs.senderPubKey),

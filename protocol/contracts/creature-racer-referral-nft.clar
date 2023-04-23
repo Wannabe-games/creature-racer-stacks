@@ -68,6 +68,9 @@
 (define-map token-ids uint (string-utf8 150))
 (define-map ref-codes (string-utf8 150) uint)
 
+;; uri mapping
+(define-map token-uri uint (string-ascii 256))
+
 ;; invitations counter
 (define-map invitations uint uint)
 
@@ -145,8 +148,7 @@
   )
 
 (define-read-only (get-token-uri (token-id uint))
-  ;; NFT URI is not supported by this contract
-  (ok none)
+  (ok (map-get? token-uri token-id))
   )
 
 (define-read-only (get-owner (token-id uint))
@@ -223,17 +225,14 @@
         )
   )
 
-;;
-;; rNFT public interface
-;;
-(define-public (mint (refcode (string-utf8 150))) 
+(define-private (mint-internal (refcode (string-utf8 150))
+                               (uri (string-ascii 256)))
     (let (
           (recipient tx-sender)
           (your-token-id (+ (var-get last-token-id) u1))
           (last-count (default-to u0 (map-get? rnft-count recipient)))
           )
       (asserts! (> (len refcode) u3) err-invalid-length)
-
       (if (is-none (map-get? ref-codes refcode))
           ;; #[allow(unchecked_data)]
           (begin
@@ -244,10 +243,31 @@
                             your-token-id
                             tx-sender))
            (var-set last-token-id your-token-id)
+           (map-set token-uri your-token-id uri)
            (ok your-token-id)
            )
           err-refcode-used)
       )
+  )
+
+;;
+;; rNFT public interface
+;;
+(define-public (mint (refcode (string-utf8 150))
+                     (uri (string-ascii 256))
+                     (operator-sig (buff 65))
+                     (sender-pk (buff 33))
+                     )
+    (begin
+     (try! (contract-call? .creature-racer-admin-v5
+                           verify-signature-string
+                           operator-sig
+                           sender-pk
+                           (some (list refcode))
+                           (some (list uri))))
+     (mint-internal refcode uri)
+     
+     )
   )
   
 
@@ -258,16 +278,18 @@
   )
 
 (define-public (special-mint (refcode (string-utf8 150))
+                             (uri (string-ascii 256))
                              (operator-sig (buff 65))
                              (sender-pk (buff 33)))
     (begin
-     (try! (contract-call? .creature-racer-admin-v4
+     (try! (contract-call? .creature-racer-admin-v5
                            verify-signature-string
                            operator-sig
                            sender-pk
-                           refcode))
+                           (some (list refcode))
+                           (some (list uri))))
      (let (
-           (token-id (try! (mint refcode)))
+           (token-id (try! (mint-internal refcode uri)))
            )
        ;; #[allow(unchecked_data)]
        (map-set special-share token-id true)
@@ -275,7 +297,7 @@
        )
      )
   )
-      
+
 
 ;;
 ;; Arguments: refcode - utf-8 string[150]
@@ -328,7 +350,7 @@
     (let (
           (token-id (try! (get-token-id refcode)))
           )
-      (try! (contract-call? .creature-racer-admin-v4
+      (try! (contract-call? .creature-racer-admin-v5
                             assert-invoked-by-operator))
       ;; #[allow(unchecked_data)]
       (if (map-insert has-fixed-referral-bonus token-id true)
@@ -342,7 +364,7 @@
     (let (
           (token-id (try! (get-token-id refcode)))
           )
-     (try! (contract-call? .creature-racer-admin-v4
+     (try! (contract-call? .creature-racer-admin-v5
                            assert-invoked-by-operator))
      ;; #[allow(unchecked_data)]
      (map-set invitees invitee token-id)
@@ -424,4 +446,14 @@
          )
       (ok (if is-special special-bps (get-percentage-of-reward-for-invitations ninv)))
       )
+  )
+
+(define-public (set-uri (token-id uint)
+                        (uri (string-ascii 256)))
+    (begin
+     (try! (contract-call? .creature-racer-admin-v5
+                           assert-invoked-by-operator))
+     (map-set token-uri token-id uri)
+     (ok true)
+     )
   )

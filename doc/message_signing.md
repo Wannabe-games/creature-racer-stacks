@@ -50,8 +50,26 @@ Conceptually this is shown on diagram below.
         Senderpubkey o         o operatorSignature
 ```
 
-
 ## Example
 
 See `makeSignature` in
 [admin.ts](../protocol/tests/utils/admin.ts).
+
+## Different argument types
+
+There are two ways to support signing for non-uint
+arguments. First is used when there is a single ASCII string
+argument. This approach leverages existing uint-based singature
+verification algorithm, by packing ASCII string into uint
+arguments. See `makeSignatureWithURI` in
+[admin.ts](../protocol/tests/utils/admin.ts) for example how this
+is done.
+
+Other approach is used when mixed set of utf/ascii attributes
+needs to be signed. This approach uses consensus buffer
+serialization. See `makeSignatureStr` in
+[admin.ts](../protocol/tests/utils/admin.ts) for some insights
+how this happens.
+
+
+

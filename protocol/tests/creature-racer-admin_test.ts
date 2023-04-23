@@ -16,9 +16,9 @@ Clarinet.test({
 
       const sig = makeSignature(opseckey, senderpubkey, 
                                   // call arguments follow
-                                  500, 531101);
+                                  500n, 531101n);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v4',
+        Tx.contractCall('creature-racer-admin-v5',
                         'verify-signature',
                         [types.buff(sig.operatorSignature),
                          types.buff(sig.senderPubKey),
@@ -46,9 +46,9 @@ Clarinet.test({
 
       const sigs = makeSignature(opseckey, senderpubkey, 
                                   // call arguments follow
-                                  500, 531101);
+                                  500n, 531101n);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v4',
+        Tx.contractCall('creature-racer-admin-v5',
                         'verify-signature',
                         [types.buff(sigs.operatorSignature),
                          types.buff(sigs.senderPubKey),
@@ -77,9 +77,9 @@ Clarinet.test({
 
       const sigs = makeSignature(opseckey, senderpubkey, 
                                   // call arguments follow
-                                  500, 531101);
+                                  500n, 531101n);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v4',
+        Tx.contractCall('creature-racer-admin-v5',
                         'verify-signature',
                         [types.buff(sigs.operatorSignature),
                          types.buff(sigs.senderPubKey),
@@ -106,9 +106,9 @@ Clarinet.test({
 
       const sigs = makeSignature(opseckey, senderpubkey, 
                                   // call arguments follow
-                                  500, 531101);
+                                  500n, 531101n);
       let block = chain.mineBlock([
-        Tx.contractCall('creature-racer-admin-v4',
+        Tx.contractCall('creature-racer-admin-v5',
                         'verify-signature',
                         [types.buff(sigs.operatorSignature),
                          types.buff(sigs.senderPubKey),

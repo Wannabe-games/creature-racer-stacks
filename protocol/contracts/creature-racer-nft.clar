@@ -47,6 +47,8 @@
 (define-map royalties uint uint)
 (define-map first-owner uint principal)
 
+(define-map token-uri uint (string-ascii 256))
+
 ;; See CreatureLib.sol, partValue
 (define-data-var part-value (list 5 uint) 
   (list 
@@ -104,6 +106,36 @@
       )
   )
 
+
+;; #[allow(unchecked_params)]
+(define-private (char-to-uint (value (string-ascii 1)))
+    ;; #[allow(unchecked_data)]
+    (let 
+        (
+         (offset u32)
+         (chars
+          (list 
+                " " "!" "\"" "#"
+                "$" "%" "&" "'" "(" ")" "*" "+" ","
+                "-" "." "/" "0" "1" "2" "3" "4" "5"
+                "6" "7" "8" "9" ":" ";" "<" "=" ">"
+                "?" "@" "A" "B" "C" "D" "E" "F" "G"
+                "H" "I" "J" "K" "L" "M" "N" "O" "P"
+                "Q" "R" "S" "T" "U" "V" "W" "X" "Y"
+                "Z" "[" "\\" "]" "^" "_" "`" "a" "b"
+                "c" "d" "e" "f" "g" "h" "i" "j" "k"
+                "l" "m" "n" "o" "p" "q" "r" "s" "t"
+                "u" "v" "w" "x" "y" "z" "{" "|" "}"
+                "~"
+                )
+           )
+         )
+      (match (index-of? chars value)
+             i (+ offset i)
+             u0)
+      )
+  )
+
 ;; unpack 5 8-bit uint buffer into 5 128-bit uints list.
 (define-private (unpack-args (args (buff 5)))
     (list (byte-to-uint (unwrap-panic (element-at args u0)))
@@ -111,6 +143,51 @@
           (byte-to-uint (unwrap-panic (element-at args u2)))
           (byte-to-uint (unwrap-panic (element-at args u3)))
           (byte-to-uint (unwrap-panic (element-at args u4))))
+  )
+
+(define-private (ascii-char-or-0 (ascii (string-ascii 256))
+                                 (index uint))
+    (match (element-at? ascii index)
+           char (char-to-uint char)
+           u0)
+  )
+
+;; make-word packs (sub-)string at given index into 128 bit
+;; uint. At most 16 characters are packed, 0-padding range
+;; overflows.
+(define-private (make-word (ascii (string-ascii 256))
+                           (index uint))
+    (bit-or
+     (bit-shift-left (ascii-char-or-0 ascii index)         u120)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u1))  u112)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u2))  u104)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u3))  u96)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u4))  u88)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u5))  u80)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u6))  u72)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u7))  u64)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u8))  u56)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u9))  u48)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u10)) u40)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u11)) u32)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u12)) u24)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u13)) u16)
+     (bit-shift-left (ascii-char-or-0 ascii (+ index u14)) u8)
+     (ascii-char-or-0 ascii (+ index u15))
+     )
+  )
+
+;; unpack ascii string as 128-bit uints. Returns list of 16 uints,
+;; zero-padded in case string is shorter than max allowed length.
+(define-private (ascii-to-uint (ascii (string-ascii 256)))
+    (list (make-word ascii u0)   (make-word ascii u16)
+          (make-word ascii u32)  (make-word ascii u48)
+          (make-word ascii u64)  (make-word ascii u80)
+          (make-word ascii u96)  (make-word ascii u112)
+          (make-word ascii u128) (make-word ascii u144)
+          (make-word ascii u160) (make-word ascii u176)
+          (make-word ascii u192) (make-word ascii u208)
+          (make-word ascii u224) (make-word ascii u240))
   )
 
 (define-private (make-creature-key (type-id (buff 1))
@@ -196,6 +273,8 @@
 ;; - type-id:      typeId id of nft creature
 ;; - parts:        5-byte buffer describing part stats
 ;; - expiry:       timestamp of creature expiration
+;; - price:        price paid for minting
+;; - uri:          uri of metadata for this NFT
 ;; - operator-sig: backend signature
 ;; - sender-sig:   sender signature
 ;;
@@ -208,26 +287,32 @@
                      (parts (buff 5))
                      (expiry uint)
                      (price uint)
+                     (uri (string-ascii 256))
                      (operator-sig (buff 65))
                      (sender-pk (buff 33)))
     (let (
           (sender tx-sender)
           (unpacked-parts (unpack-args parts))
+          (signed-args (concat
+                        (concat (list nft-id
+                                      (byte-to-uint type-id))
+                                unpacked-parts)
+                        (concat (list expiry
+                                      price)
+                                (ascii-to-uint uri))
+                        
+                        ))
           )
       (try! 
-       (contract-call? .creature-racer-admin-v4
+       (contract-call? .creature-racer-admin-v5
                        verify-signature
                        operator-sig
                        sender-pk
-                       (concat
-                        (concat 
-                         (list nft-id
-                               (byte-to-uint type-id))
-                         unpacked-parts)
-                        (list expiry price))))
+                       signed-args)
+       )
       (if (> price u0)
           (try!
-           (contract-call? .creature-racer-payment-v4
+           (contract-call? .creature-racer-payment-v5
                            receive-funds  
                            price)) true)
       (let
@@ -259,6 +344,7 @@
         (map-set creature-supply creature-key (+ u1
                                                  supply))
         (map-set first-owner nft-id sender)
+        (map-set token-uri nft-id uri)
         (ok true)
         )
       )
@@ -435,6 +521,18 @@
         err-forbidden
         )
   )
+
+
+(define-public (set-uri (token-id uint)
+                        (uri (string-ascii 256)))
+    (begin
+     (try! (contract-call? .creature-racer-admin-v5
+                           assert-invoked-by-operator))
+     (map-set token-uri token-id uri)
+     (ok true)
+     )
+  )
+
 ;;
 ;; Functions required by nft-trait
 ;; -------------------------------
@@ -444,7 +542,7 @@
     (ok (var-get last-token)))
 
 (define-read-only (get-token-uri (token-id uint))
-    (ok none)) ;; Not supported
+    (ok (map-get? token-uri token-id)))
 
 (define-read-only (get-owner (token-id uint))
     (ok (nft-get-owner? creature-racer-creature-nft token-id))

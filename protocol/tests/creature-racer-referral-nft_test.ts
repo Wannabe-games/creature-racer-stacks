@@ -8,13 +8,13 @@ import { assertEquals, fail } from 'https://deno.land/std@0.90.0/testing/asserts
 import { setOperator, makeSignatureStr } from './utils/admin.ts';
 import { mintRNFT, incrementInvitations,
          randomInvites } from './utils/rnft.ts';
-import { userA, userB } from './utils/chain.ts';
+import { userA, userB, userC } from './utils/chain.ts';
 
 
 function getInvitationsByInvitee(chain: Chain,
                                    user: Account,
                                    operator: Account) {
-  return chain.callReadOnlyFn('creature-racer-referral-nft-v4',
+  return chain.callReadOnlyFn('creature-racer-referral-nft-v5',
                               'get-invitations-by-invitee',
                               [types.principal(user.address)],
                               operator.address).result;
@@ -23,7 +23,7 @@ function getInvitationsByInvitee(chain: Chain,
 function getInvitationsByRefCode(chain: Chain,
                                  refcode: string,
                                  operator: Account) {
-  return chain.callReadOnlyFn('creature-racer-referral-nft-v4',
+  return chain.callReadOnlyFn('creature-racer-referral-nft-v5',
                               'get-invitations-by-ref-code',
                               [types.utf8(refcode)],
                               operator.address).result;
@@ -33,17 +33,17 @@ Clarinet.test({
   name: "Ensure that referral code cannot be less than 4 unicode characters",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let testchr = "W";
-    let user = accounts.get('wallet_1')!;
+    const user = userA(accounts);
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_3')!;
+    const operator = userB(accounts);
 
     setOperator(chain, owner, operator);
 
-    let b1 = mintRNFT(chain, user, testchr.repeat(3));
+    let b1 = mintRNFT(chain, user, testchr.repeat(3), operator);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(err u3005)');
 
-    let b2 = mintRNFT(chain, user, testchr.repeat(4));
+    let b2 = mintRNFT(chain, user, testchr.repeat(4), operator);
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.receipts[0].result, '(ok u1)');
   }
@@ -53,16 +53,16 @@ Clarinet.test({
   name: "Ensure that referral code cannot be more than 150 unicode characters",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let testchr = "W";
-    let user = accounts.get('wallet_1')!;
+    const user = userA(accounts);
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_3')!;
+    const operator = userB(accounts);
 
     setOperator(chain, owner, operator);
 
-    let b1 = mintRNFT(chain, user, testchr.repeat(151));
+    let b1 = mintRNFT(chain, user, testchr.repeat(151), operator);
     assertEquals(b1.receipts.length, 0);
 
-    let b2 = mintRNFT(chain, user, testchr.repeat(150));
+    let b2 = mintRNFT(chain, user, testchr.repeat(150), operator);
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.receipts[0].result, '(ok u1)');
     
@@ -74,25 +74,25 @@ Clarinet.test({
 Clarinet.test({
   name: "Ensure that referral code can be used only once",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    
-    let user1 = accounts.get('wallet_1')!;
-    let user2 = accounts.get('wallet_2')!;
+
+    const refCode = 'ABCDE';
+
+    let user1 = userA(accounts);
+    let user2 = userB(accounts);
     
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_4')!;
+    let operator = userC(accounts);
+
     setOperator(chain, owner, operator);
     
-    let block = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v4',
-                      'mint', [types.utf8('ABCDE')],
-                      user1.address),
-      Tx.contractCall('creature-racer-referral-nft-v4',
-                      'mint', [types.utf8('ABCDE')],
-                      user2.address)
-    ]);
-    assertEquals(block.receipts.length, 2);
-    assertEquals(block.receipts[0].result, '(ok u1)');
-    assertEquals(block.receipts[1].result, '(err u3001)');
+    let b1 = mintRNFT(chain, user1, refCode, operator);
+    let b2 = mintRNFT(chain, user2, refCode, operator);
+
+    assertEquals(b1.receipts.length, 1);
+    assertEquals(b1.receipts[0].result, '(ok u1)');
+
+    assertEquals(b2.receipts.length, 1);
+    assertEquals(b2.receipts[0].result, '(err u3001)');
   },
 });
 
@@ -100,20 +100,20 @@ Clarinet.test({
 Clarinet.test({
   name: "Ensure that invitations count is tracked for valid refcode",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let user1 = accounts.get('wallet_1')!;
+    let user1 = userA(accounts);
 
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_2')!;
-    let invitee = accounts.get('wallet_3')!;
+    let operator = userB(accounts);
+    let invitee = userC(accounts);
 
     setOperator(chain, owner, operator);
     
     let refcode = 'abcdefg';
 
-    let b1 = mintRNFT(chain, user1, refcode);
+    let b1 = mintRNFT(chain, user1, refcode, operator);
 
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v4',
+      Tx.contractCall('creature-racer-referral-nft-v5',
                       'increment-invitations',
                       [types.utf8(refcode), 
                        types.principal(invitee.address)],
@@ -144,7 +144,7 @@ Clarinet.test({
     let refcode = 'asd';
 
     let b = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v4',
+      Tx.contractCall('creature-racer-referral-nft-v5',
                       'increment-invitations',
                       [types.utf8(refcode), 
                        types.principal(invitee.address)],
@@ -167,18 +167,18 @@ Clarinet.test({
   name: "Ensure that correct percent of reward is calculated",
   async fn(chain: Chain, accounts: Map<string, Account>) {
 
-    let user1 = accounts.get('wallet_1')!;
-    let user2 = accounts.get('wallet_3')!;
+    let user1 = userA(accounts);
+    let user2 = userB(accounts);
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_2')!;
+    let operator = userC(accounts);
     let refcode = 'testing';
 
     setOperator(chain, owner, operator);
-    let b1 = mintRNFT(chain, user1, refcode);
+    let b1 = mintRNFT(chain, user1, refcode, operator);
     
     
     const getPercentageOfRewardBPS = (user: Account) => {
-      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
+      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v5',
                                        'get-percentage-of-reward-bps',
                                        [types.principal(user.address)],
                                        user1.address);
@@ -205,10 +205,10 @@ Clarinet.test({
 Clarinet.test({
   name: "Ensure that set royalties are settable only for first owner of rNFT",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let user1 = accounts.get('wallet_1')!;
-    let user2 = accounts.get('wallet_3')!;
+    let user1 = userA(accounts);
+    let user2 = userB(accounts);
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_2')!;
+    let operator = userC(accounts);
 
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, user1, 'asdc', operator);
@@ -216,7 +216,7 @@ Clarinet.test({
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v4',
+      Tx.contractCall('creature-racer-referral-nft-v5',
                       'set-royalty',
                       [types.uint(1), 
                        types.uint(100)],
@@ -232,9 +232,9 @@ Clarinet.test({
 Clarinet.test({
   name: "Ensure that royalties are correcty computed",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let user1 = accounts.get('wallet_1')!;
+    let user1 = userA(accounts)
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_2')!;
+    let operator = userC(accounts);
 
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, user1, 'asdc', operator);
@@ -242,7 +242,7 @@ Clarinet.test({
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v4',
+      Tx.contractCall('creature-racer-referral-nft-v5',
                       'set-royalty',
                       [types.uint(1), 
                        types.uint(100)],
@@ -251,7 +251,7 @@ Clarinet.test({
     assertEquals(b2.receipts.length, 1);
     assertEquals(b2.receipts[0].result, '(ok true)');
 
-    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
+    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v5',
                                    'royalty-info',
                                    [types.uint(1),
                                     types.uint(10000)],
@@ -265,16 +265,16 @@ Clarinet.test({
 Clarinet.test({
   name: "Ensure that error is reported when  royalties are not set",
   async fn(chain: Chain, accounts: Map<string, Account>) {
-    let user1 = accounts.get('wallet_1')!;
+    let user1 = userA(accounts);
     let owner = accounts.get('deployer')!;
-    let operator = accounts.get('wallet_2')!;
+    let operator = userC(accounts);
 
     setOperator(chain, owner, operator);
     let b1 = mintRNFT(chain, user1, 'asdc', operator);
     assertEquals(b1.receipts.length, 1);
     assertEquals(b1.receipts[0].result, '(ok u1)');
     
-    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
+    let res = chain.callReadOnlyFn('creature-racer-referral-nft-v5',
                                    'royalty-info',
                                    [types.uint(1),
                                     types.uint(10000)],
@@ -293,18 +293,21 @@ Clarinet.test({
 
     const deployer = accounts.get('deployer')!;
     const operator = accounts.get('wallet_1')!;
-    const  refcode = 'testing';
+    const refcode = 'testing';
+    const uri = 'whatever';
     const userA = accounts.get('wallet_2')!;
     const userB = accounts.get('wallet_3')!;
 
     setOperator(chain, deployer, operator);
 
-    const sigs = makeSignatureStr(skOperator, pkUserA, refcode);
+    const sigs = makeSignatureStr(skOperator, pkUserA, [refcode],
+                                 [uri]);
 
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-referral-nft-v4',
+      Tx.contractCall('creature-racer-referral-nft-v5',
                       'special-mint',
                       [ types.utf8(refcode),
+                        types.ascii(uri),
                         types.buff(sigs.operatorSignature),
                         types.buff(sigs.senderPubKey)
                       ], userA.address)
@@ -315,7 +318,7 @@ Clarinet.test({
 
     
     const getRefcodeProfit = (refcode: string) => {
-      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v4',
+      const res = chain.callReadOnlyFn('creature-racer-referral-nft-v5',
                                        'get-refcode-profit',
                                        [types.utf8(refcode)],
                                        userA.address);
@@ -337,3 +340,117 @@ Clarinet.test({
   },
 });
 
+Clarinet.test({
+  name: "Ensure that URI is settable when minting rNFT",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let user1 = userA(accounts);
+    let user2 = userB(accounts);
+    let owner = accounts.get('deployer')!;
+    let operator = userC(accounts);
+
+    setOperator(chain, owner, operator);
+    let b1 = mintRNFT(chain, user1, "abcd", operator, 'uri1');
+    let b2 = mintRNFT(chain, user2, "defg", operator, 'uri2');
+    assertEquals(b1.receipts.length, 1);
+    b1.receipts[0].result.expectOk().expectUint(1);
+    assertEquals(b2.receipts.length, 1);
+    b2.receipts[0].result.expectOk().expectUint(2);
+
+    chain.callReadOnlyFn('creature-racer-referral-nft-v5',
+                                      'get-token-uri',
+                                      [types.uint(1)],
+                                      operator.address)
+      .result.expectOk().expectSome().expectAscii('uri1');
+
+    chain.callReadOnlyFn('creature-racer-referral-nft-v5',
+                         'get-token-uri',
+                         [types.uint(2)],
+                         operator.address)
+      .result.expectOk().expectSome().expectAscii('uri2');
+  },
+});
+
+
+Clarinet.test({
+  name: "Ensure that URI is settable when minting special rNFT",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const refcode = "ABCDEF";
+    let user1 = userA(accounts);
+    let owner = accounts.get('deployer')!;
+    let operator = userC(accounts);
+    let uri = 'myuri';
+
+    const sigs = makeSignatureStr(operator.secretKey,
+                                  user1.publicKey,
+                                  [refcode],
+                                  [uri]);
+    setOperator(chain, owner, operator);
+    let b1 = chain.mineBlock([
+      Tx.contractCall('creature-racer-referral-nft-v5',
+                      'special-mint',
+                      [ types.utf8(refcode),
+                        types.ascii('myuri'),
+                        types.buff(sigs.operatorSignature),
+                        types.buff(sigs.senderPubKey) ],
+                      user1.address)
+    ]);
+    assertEquals(b1.receipts.length, 1);
+    b1.receipts[0].result.expectOk().expectUint(1);
+
+    chain.callReadOnlyFn('creature-racer-referral-nft-v5',
+                                      'get-token-uri',
+                                      [types.uint(1)],
+                                      operator.address)
+      .result.expectOk().expectSome().expectAscii('myuri');
+
+  },
+});
+
+Clarinet.test({
+  name: "Ensure that only operator can change URI",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    let user1 = userA(accounts);
+    let owner = accounts.get('deployer')!;
+    let operator = userC(accounts);
+
+    setOperator(chain, owner, operator);
+    let b1 = mintRNFT(chain, user1, "abcd", operator, 'uri1');
+    assertEquals(b1.receipts.length, 1);
+    b1.receipts[0].result.expectOk().expectUint(1);
+    chain.callReadOnlyFn('creature-racer-referral-nft-v5',
+                                      'get-token-uri',
+                                      [types.uint(1)],
+                                      operator.address)
+      .result.expectOk().expectSome().expectAscii('uri1');
+
+    let b2 = chain.mineBlock([
+      Tx.contractCall('creature-racer-referral-nft-v5',
+                      'set-uri',
+                      [ types.uint(1), types.ascii('changed') ],
+                      user1.address)
+    ]);
+    assertEquals(b2.receipts.length, 1);
+    b2.receipts[0].result.expectErr().expectUint(403);
+
+    chain.callReadOnlyFn('creature-racer-referral-nft-v5',
+                                      'get-token-uri',
+                                      [types.uint(1)],
+                                      operator.address)
+      .result.expectOk().expectSome().expectAscii('uri1');
+
+    let b3 = chain.mineBlock([
+      Tx.contractCall('creature-racer-referral-nft-v5',
+                      'set-uri',
+                      [ types.uint(1), types.ascii('changed') ],
+                      operator.address)
+    ]);
+    assertEquals(b3.receipts.length, 1);
+    b3.receipts[0].result.expectOk();
+
+    chain.callReadOnlyFn('creature-racer-referral-nft-v5',
+                                      'get-token-uri',
+                                      [types.uint(1)],
+                                      operator.address)
+      .result.expectOk().expectSome().expectAscii('changed');
+  },
+});

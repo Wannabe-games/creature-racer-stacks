@@ -8,14 +8,14 @@ import { Identity } from './utils/admin.ts';
 import { getNFTBalance, userA, userB } from './utils/chain.ts';
 import { mintCreature } from './utils/cnft.ts';
 
-const nftClass = '.creature-racer-nft-v4.creature-racer-creature-nft';
+const nftClass = '.creature-racer-nft-v5.creature-racer-creature-nft';
 
 
 
 function getUserShare(chain: Chain, user: Identity) {
     
   const share = 
-      chain.callReadOnlyFn('creature-racer-staking-v4',
+      chain.callReadOnlyFn('creature-racer-staking-v5',
                            'get-user-share',
                            [ types.principal(user.address) ],
                            user.address);
@@ -29,7 +29,7 @@ function getUserShare(chain: Chain, user: Identity) {
 function getTotalShare(chain: Chain, user: Identity) {
     
   const share = 
-      chain.callReadOnlyFn('creature-racer-staking-v4',
+      chain.callReadOnlyFn('creature-racer-staking-v5',
                            'get-total-share',
                            [ ],
                            user.address);
@@ -49,11 +49,11 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 1, 1, 1, 1, 1, 1, 100, 0];
+    const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 100n, 0n];
     mintCreature(chain, uB, nftParams);
     
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-staking-v4', 'enter-staking',
+      Tx.contractCall('creature-racer-staking-v5', 'enter-staking',
                       [ types.uint(1) ],
                       uA.address)
     ]);
@@ -71,11 +71,11 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 1, 1, 1, 1, 1, 1, 100, 0];
+    const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 100n, 0n];
     mintCreature(chain, uA, nftParams);
     
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-staking-v4', 'enter-staking',
+      Tx.contractCall('creature-racer-staking-v5', 'enter-staking',
                       [ types.uint(1) ],
                       uA.address)
     ]);
@@ -94,17 +94,17 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const uA = userA(accounts);
     const uB = userB(accounts);
-    const nftParams = [1, 7, 1, 4, 3, 5, 4, 100, 1000];
+    const nftParams = [1n, 7n, 1n, 4n, 3n, 5n, 4n, 100n, 1000n];
     mintCreature(chain, uA, nftParams);
       
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-nft-v4',
+      Tx.contractCall('creature-racer-nft-v5',
                       'set-approved-for-all',
                       [ types.principal(deployer.address +
-                        '.creature-racer-staking-v4'),
+                        '.creature-racer-staking-v5'),
                         types.bool(true) ],
                       uA.address),
-      Tx.contractCall('creature-racer-staking-v4', 'enter-staking',
+      Tx.contractCall('creature-racer-staking-v5', 'enter-staking',
                       [ types.uint(1) ],
                       uA.address)
     ]);
@@ -116,7 +116,7 @@ Clarinet.test({
     const userAShare = getUserShare(chain, uA);
     const totalShare = getTotalShare(chain, uA);
 
-    let scRes = chain.callReadOnlyFn('creature-racer-staking-v4',
+    let scRes = chain.callReadOnlyFn('creature-racer-staking-v5',
                                      'get-staked-creatures',
                                      [ types.principal(uA.address),
                                        types.uint(1) ],
@@ -128,11 +128,11 @@ Clarinet.test({
 });
 
 const creatures = [
-  { data: [7, 4, 1, 3, 4, 2], weight: 400742941786 },
-  { data: [16, 3, 5, 4, 4, 3], weight: 2723307049292 },
-  { data: [14, 4, 1, 2, 1, 4], weight: 1456356755882 },
-  { data: [15, 1, 3, 2, 5, 2], weight: 1506505340991 },
-  { data: [17, 3, 3, 5, 1, 4], weight: 2130386823807 },
+  { data: [7n, 4n, 1n, 3n, 4n, 2n], weight: 400742941786 },
+  { data: [16n, 3n, 5n, 4n, 4n, 3n], weight: 2723307049292 },
+  { data: [14n, 4n, 1n, 2n, 1n, 4n], weight: 1456356755882 },
+  { data: [15n, 1n, 3n, 2n, 5n, 2n], weight: 1506505340991 },
+  { data: [17n, 3n, 3n, 5n, 1n, 4n], weight: 2130386823807 },
 ];
 
 creatures.forEach(creature => {
@@ -140,15 +140,15 @@ creatures.forEach(creature => {
     name: `Ensure that it calculates weight for creature [${creature.data[0]} ${creature.data[1]} ${creature.data[2]} ${creature.data[3]} ${creature.data[4]} ${creature.data[5]}`,
     async fn(chain: Chain, accounts: Map<string, Account>) {
       const nftParams = [
-        1,
+        1n,
         creature.data[0],
         creature.data[1],
         creature.data[2],
         creature.data[3],
         creature.data[4],
         creature.data[5],
-        10000,
-        0,
+        10000n,
+        0n,
       ] as const;
       const deployer = accounts.get('deployer')!;
       const operator = accounts.get('wallet_1')!;
@@ -158,13 +158,13 @@ creatures.forEach(creature => {
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v4',
+        Tx.contractCall('creature-racer-nft-v5',
                         'set-approved-for-all',
                         [ types.principal(deployer.address +
-                          '.creature-racer-staking-v4'),
+                          '.creature-racer-staking-v5'),
                           types.bool(true) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 'enter-staking',
+        Tx.contractCall('creature-racer-staking-v5', 'enter-staking',
                         [ types.uint(1) ],
                         uA.address)
       ]);
@@ -187,17 +187,17 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
+      const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 1000n, 0n] as const;
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v4',
+        Tx.contractCall('creature-racer-nft-v5',
                         'set-approved-for-all',
                         [ types.principal(deployer.address +
-                          '.creature-racer-staking-v4'),
+                          '.creature-racer-staking-v5'),
                           types.bool(true) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'enter-staking',
                         [ types.uint(1) ],
                         uA.address)
@@ -207,7 +207,7 @@ Clarinet.test({
       assertEquals(b1.receipts[0].result, '(ok true)');
       assertEquals(b1.receipts[1].result, '(ok true)');
  
-      let scRes = chain.callReadOnlyFn('creature-racer-staking-v4',
+      let scRes = chain.callReadOnlyFn('creature-racer-staking-v5',
                                        'get-staked-creatures',
                                        [ types.principal(uA.address),
                                          types.uint(1) ],
@@ -215,7 +215,7 @@ Clarinet.test({
       assertEquals(scRes.result, '(ok u1)');
 
       const stakingContractAddr = deployer.address + 
-        '.creature-racer-staking-v4';
+        '.creature-racer-staking-v5';
       const stakingBalance = getNFTBalance(chain, nftClass,
                                            stakingContractAddr);
       const uABalance = getNFTBalance(chain, nftClass, 
@@ -224,11 +224,11 @@ Clarinet.test({
       assertEquals(uABalance, 0);
       
       let b2 = chain.mineBlock([
-        Tx.contractCall('creature-racer-staking-v4',
+        Tx.contractCall('creature-racer-staking-v5',
                         'open-new-cycle',
                         [ ],
                         operator.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'leave-staking',
                         [ types.uint(1) ],
                         uA.address)
@@ -238,7 +238,7 @@ Clarinet.test({
       assertEquals(b2.receipts[0].result, '(ok true)');
       assertEquals(b2.receipts[1].result, '(ok true)');
 
-      let scRes2 = chain.callReadOnlyFn('creature-racer-staking-v4',
+      let scRes2 = chain.callReadOnlyFn('creature-racer-staking-v5',
                                         'get-staked-creatures',
                                         [ types.principal(uA.address),
                                           types.uint(1) ],
@@ -263,7 +263,7 @@ Clarinet.test({
       const uA = userA(accounts);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'leave-staking',
                         [ types.uint(123) ],
                         uA.address)
@@ -282,21 +282,21 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
+      const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 1000n, 0n] as const;
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v4',
+        Tx.contractCall('creature-racer-nft-v5',
                         'set-approved-for-all',
                         [ types.principal(deployer.address +
-                          '.creature-racer-staking-v4'),
+                          '.creature-racer-staking-v5'),
                           types.bool(true) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'enter-staking',
                         [ types.uint(1) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'leave-staking',
                         [ types.uint(1) ],
                         uA.address)
@@ -317,21 +317,21 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
+      const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 1000n, 0n] as const;
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v4',
+        Tx.contractCall('creature-racer-nft-v5',
                         'set-approved-for-all',
                         [ types.principal(deployer.address +
-                          '.creature-racer-staking-v4'),
+                          '.creature-racer-staking-v5'),
                           types.bool(true) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'enter-staking',
                         [ types.uint(1) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'remove-expired-creature',
                         [ types.principal(uA.address),
                           types.uint(1) ],
@@ -351,20 +351,20 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 1000, 0] as const;
+      const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 1000n, 0n] as const;
       const stakingContractAddr = deployer.address + 
-        '.creature-racer-staking-v4';
+        '.creature-racer-staking-v5';
 
       mintCreature(chain, uA, nftParams);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v4',
+        Tx.contractCall('creature-racer-nft-v5',
                         'set-approved-for-all',
                         [ types.principal(deployer.address +
-                          '.creature-racer-staking-v4'),
+                          '.creature-racer-staking-v5'),
                           types.bool(true) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'enter-staking',
                         [ types.uint(1) ],
                         uA.address),
@@ -380,7 +380,7 @@ Clarinet.test({
 
       
       let b2 = chain.mineBlock([
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'remove-expired-creature',
                         [ types.principal(uA.address), 
                           types.uint(1) ],
@@ -409,20 +409,20 @@ Clarinet.test({
       const operator = accounts.get('wallet_1')!;
       setOperator(chain, deployer, operator);
       const uA = userA(accounts);
-      const nftParams = [1, 1, 1, 1, 1, 1, 1, 4, 0] as const;
+      const nftParams = [1n, 1n, 1n, 1n, 1n, 1n, 1n, 4n, 0n] as const;
 
       mintCreature(chain, uA, nftParams);
 
       chain.mineEmptyBlock(5);
       
       let b1 = chain.mineBlock([
-        Tx.contractCall('creature-racer-nft-v4',
+        Tx.contractCall('creature-racer-nft-v5',
                         'set-approved-for-all',
                         [ types.principal(deployer.address +
-                          '.creature-racer-staking-v4'),
+                          '.creature-racer-staking-v5'),
                           types.bool(true) ],
                         uA.address),
-        Tx.contractCall('creature-racer-staking-v4', 
+        Tx.contractCall('creature-racer-staking-v5', 
                         'enter-staking',
                         [ types.uint(1) ],
                         uA.address),

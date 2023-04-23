@@ -110,16 +110,13 @@
                      )))))))))))))))
   )
     
-;; Signature payload buffer must be large enough to
-;; keep inner signature (65 bytes) and up to 10 128-bit
-;; arguments, so we need 225 bytes in total.
-(define-private (concat-buff (a (optional (buff 225))) 
-                             (b (optional (buff 225))))
+(define-private (concat-buff (a (optional (buff 800))) 
+                             (b (optional (buff 800))))
     (match b
            val (some (unwrap-panic (as-max-len? 
                                     (concat val
                                             (unwrap-panic a) 
-                                            ) u225)))
+                                            ) u800)))
            a))
 
 (define-private (make-optional (val (buff 225)))
@@ -130,12 +127,11 @@
                  (sender-pk (buff 33))
                  (argbuff (buff 800)))
     (let (
-          (arghash (sha256 argbuff))
           (sender (unwrap! (principal-of? sender-pk)
                            err-invalid-signature))
           (msgbuff (unwrap-panic (as-max-len?
                                   (concat sender-pk argbuff)
-                                  u225)))
+                                  u800)))
           (msghash (sha256 msgbuff))
           (operator-pk (unwrap! 
                         (secp256k1-recover? msghash
@@ -147,12 +143,20 @@
           (cop (unwrap! (var-get operator)
                         err-operator-unset))
           )
+
       (if (and (is-eq sender tx-sender)
                (is-eq operator-principal cop))
           (ok true)
-          err-invalid-signature)
+          err-invalid-signature
       )
   )
+)
+
+
+(define-private (utf8-to-buff (val (string-utf8 150)))
+    (to-consensus-buff? val))
+(define-private (ascii-to-buff (val (string-ascii 256)))
+    (to-consensus-buff? val))
 
 
 ;;
@@ -210,7 +214,7 @@
 (define-read-only (verify-signature
                    (operator-sig (buff 65))
                    (sender-pk (buff 33))
-                   (args (list 10 uint)))
+                   (args (list 26 uint)))
     (let (
           (argbuff (unwrap-panic
                         (fold concat-buff
@@ -218,6 +222,7 @@
                                    (map uint-to-buff args))
                               none)))
       )
+
       (verify-signature-internal operator-sig sender-pk argbuff)
       )
 )
@@ -225,13 +230,28 @@
 (define-read-only (verify-signature-string
                    (operator-sig (buff 65))
                    (sender-pk (buff 33))
-                   (arg (string-utf8 150)))
+                   (utf8-args (optional (list 10 (string-utf8 150))))
+                   (ascii-args (optional (list 10 (string-ascii 256)))))
     (let (
-          (argbuff (unwrap-panic
-                    (to-consensus-buff? arg)))
+          (argbuff  
+           (match utf8-args
+                  utf8vals 
+                  (match ascii-args
+                         asciivals
+                         (concat-buff
+                          (fold concat-buff (map utf8-to-buff utf8vals) none)
+                          (fold concat-buff (map ascii-to-buff asciivals) none)
+                          )
+                         (fold concat-buff (map utf8-to-buff utf8vals) none)
+                         )
+                  (fold concat-buff 
+                        (map ascii-to-buff (unwrap-panic ascii-args)) none)
+                  )
+            )
           )
-      (verify-signature-internal operator-sig sender-pk argbuff)
+
+      (verify-signature-internal operator-sig sender-pk (unwrap-panic argbuff))
       )
   )
-          
+
 

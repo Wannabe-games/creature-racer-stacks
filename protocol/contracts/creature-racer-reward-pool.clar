@@ -52,7 +52,7 @@
       (asserts! (> amount-ustx u0) err-invalid-amount)
       (try! (stx-transfer? amount-ustx
                            tx-sender
-                           .creature-racer-reward-pool-v4))
+                           .creature-racer-reward-pool-v5))
       (map-set cycles cycle (+ cycle-amount amount-ustx))
       (map-set cycle-balance cycle (+ balance amount-ustx))
       (ok true)
@@ -73,7 +73,7 @@
            (+ (default-to u0 (map-get? withdrawal-counters
                                        sender)) u1))
           )
-      (try! (contract-call? .creature-racer-admin-v4
+      (try! (contract-call? .creature-racer-admin-v5
                             verify-signature
                             operator-sig
                             sender-pk
@@ -113,7 +113,7 @@
           )
       (try!
        (contract-call?
-        .creature-racer-admin-v4
+        .creature-racer-admin-v5
         assert-invoked-by-operator))
       (var-set current-cycle next-cycle)
       (if (>= next-cycle cycle-period)

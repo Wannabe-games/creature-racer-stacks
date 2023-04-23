@@ -2,7 +2,7 @@
 import { Clarinet, Tx, Chain, Account, types } from 'https://deno.land/x/clarinet@v1.0.5/index.ts';
 import { assertEquals } from 'https://deno.land/std@0.90.0/testing/asserts.ts';
 import { setOperator,
-         makeSignature } from './utils/admin.ts';
+         makeSignature, makeSignatureWithURI } from './utils/admin.ts';
 
 const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
 const pkOperator ='03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9'; 
@@ -16,9 +16,9 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const userA = accounts.get('wallet_2')!;
     const sigs = makeSignature(skOperator, pkUserA,
-                                10, 1, 0);
+                                10n, 1n, 0n);
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
                         types.buff(sigs.senderPubKey),
@@ -39,13 +39,13 @@ Clarinet.test({
     setOperator(chain, deployer, operator);
     const userA = accounts.get('wallet_2')!;
     const sigs = makeSignature(skOperator, pkUserA,
-                                10, 2, 0);
+                                10n, 2n, 0n);
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'receive-funds',
                       [ types.uint(10) ],
                       operator.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'withdraw',
                       [ types.buff(sigs.operatorSignature),
                         types.buff(sigs.senderPubKey),
@@ -69,13 +69,13 @@ Clarinet.test({
     const userA = accounts.get('wallet_2')!;
 
     let b1 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'receive-funds',
                       [types.uint(2000)],
                       operator.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-balance', [], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(0)], userA.address)
     ]);
@@ -87,7 +87,7 @@ Clarinet.test({
 
     const openNewCycle = function() {
       let b = chain.mineBlock([
-        Tx.contractCall('creature-racer-reward-pool-v4',
+        Tx.contractCall('creature-racer-reward-pool-v5',
                         'open-new-cycle', [],
                         operator.address)
       ]);
@@ -98,13 +98,13 @@ Clarinet.test({
 
     openNewCycle(); // 1
     let b2 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'receive-funds',
                       [ types.uint(2000) ],
                       operator.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-balance', [], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(1)], userA.address)
     ]);
@@ -117,16 +117,16 @@ Clarinet.test({
     openNewCycle(); // 3
 
     let b3 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'receive-funds',
                       [ types.uint(2000) ],
                       operator.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-balance', [], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(2)], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(3)], userA.address)
     ]);
@@ -141,16 +141,16 @@ Clarinet.test({
     openNewCycle(); // 5
 
     let b4 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'receive-funds',
                       [ types.uint(2000) ],
                       operator.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-balance', [], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(4)], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(5)], userA.address)
     ]);
@@ -164,19 +164,19 @@ Clarinet.test({
     openNewCycle(); // 7
 
     let b5 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'receive-funds',
                       [ types.uint(2000) ],
                       operator.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-balance', [], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(6)], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(7)], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(0)], userA.address)
     ]);
@@ -191,9 +191,9 @@ Clarinet.test({
 
     const withdrawalSigs = makeSignature(skOperator,
                                           pkUserA,
-                                          1500, 1, 1);
+                                          1500n, 1n, 1n);
     let b6 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'withdraw',
                       [ types.buff(withdrawalSigs.operatorSignature),
                         types.buff(withdrawalSigs.senderPubKey),
@@ -201,7 +201,7 @@ Clarinet.test({
                         types.uint(1),
                         types.uint(1) ],
                       userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(1)], userA.address),
     ]);
@@ -213,16 +213,16 @@ Clarinet.test({
     openNewCycle(); // 9
 
     let b7 = chain.mineBlock([
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-balance', [ ],
                       userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(8)], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(9)], userA.address),
-      Tx.contractCall('creature-racer-reward-pool-v4',
+      Tx.contractCall('creature-racer-reward-pool-v5',
                       'get-cycle-balance',
                       [types.uint(1)], userA.address),
     ]);
