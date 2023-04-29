@@ -341,6 +341,70 @@ Clarinet.test({
 });
 
 Clarinet.test({
+  name: "Ensure that correct percent of reward is transferred for special refcodes",
+  async fn(chain: Chain, accounts: Map<string, Account>) {
+    const skOperator = '7287ba251d44a4d3fd9276c88ce34c5c52a038955511cccaf77e61068649c17801';
+    const pkOperator ='03cd2cfdbd2ad9332828a7a13ef62cb999e063421c708e863a7ffed71fb61c88c9'; 
+    const pkUserA = '021843d01fa0bb9a3495fd2caf92505a81055dbe1fd545880fd40c3a1c7fd9c40a';
+
+    const deployer = accounts.get('deployer')!;
+    const operator = accounts.get('wallet_1')!;
+    const refcode = 'testing';
+    const uri = 'whatever';
+    const userA = accounts.get('wallet_2')!;
+    const userB = accounts.get('wallet_3')!;
+
+    setOperator(chain, deployer, operator);
+
+    const sigs = makeSignatureStr(skOperator, pkOperator, [refcode],
+                                 [uri]);
+
+    let b1 = chain.mineBlock([
+      Tx.contractCall('creature-racer-referral-nft-v5',
+                      'special-mint',
+                      [ types.utf8(refcode),
+                        types.ascii(uri),
+                        types.buff(sigs.operatorSignature),
+                        types.buff(sigs.senderPubKey)
+                      ], operator.address),
+      
+    ]);
+
+    
+
+    assertEquals(b1.receipts.length, 1);
+    assertEquals(b1.receipts[0].result, '(ok u1)');
+
+    let b2 = chain.mineBlock([
+      Tx.contractCall('creature-racer-referral-nft-v5',
+                      'transfer',
+                      [ types.uint(1),
+                        types.principal(operator.address),
+                        types.principal(userA.address) ],
+                      operator.address)
+    ]);
+    assertEquals(b2.receipts.length, 1);
+    assertEquals(b2.receipts[0].result, '(ok true)');
+    
+    incrementInvitations(chain, refcode, userB.address,
+                         operator);
+    let b3 = chain.mineBlock([
+      Tx.contractCall('creature-racer-payment-v5',
+                      'receive-funds',
+                      [ types.uint(1000000) ],
+                      userB.address)
+    ]);
+
+    assertEquals(b3.receipts.length, 1);
+    assertEquals(b3.receipts[0].result, '(ok true)');
+    b3.receipts[0].events.expectSTXTransferEvent(450000, 
+                                                 deployer.address + '.creature-racer-payment-v5',
+                                                deployer.address + '.creature-racer-referral-pool-v5');
+  },
+});
+
+
+Clarinet.test({
   name: "Ensure that URI is settable when minting rNFT",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     let user1 = userA(accounts);
