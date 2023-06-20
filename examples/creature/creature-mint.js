@@ -3,6 +3,7 @@ const {
   broadcastTransaction,
   standardPrincipalCV,
   uintCV, bufferCV,
+  stringAsciiCV,
   pubKeyfromPrivKey, 
   privateKeyToString,
   TransactionVersion,
@@ -31,8 +32,8 @@ function uint128toBytes(v) {
   var rv = [];
 
   for(var n = 0; n < 16; n++) {
-    rv[n] = v & 0xff;
-    v = v >> 8;
+    rv[n] = Number(BigInt(v) & BigInt(0xff));
+    v = BigInt(v) >> BigInt(8);
   }
   return rv;
 }
@@ -54,12 +55,52 @@ function sign(buffer, key) {
                               privateKey: createStacksPrivateKey(key) });
 }
 
+function toUint128Array(s) {
+  return [
+    makeWord(s, 0), makeWord(s, 16),
+    makeWord(s, 32), makeWord(s, 48),
+    makeWord(s, 64), makeWord(s, 80),
+    makeWord(s, 96), makeWord(s, 112),
+    makeWord(s, 128), makeWord(s, 144),
+    makeWord(s, 160), makeWord(s, 176),
+    makeWord(s, 192), makeWord(s, 208),
+    makeWord(s, 224), makeWord(s, 240)
+    ];
+}
+
+function ordAt(s, i) {
+  if(i < s.length) {
+    return BigInt(s.charCodeAt(i));
+  } else {
+    return BigInt(0n);
+  }
+}
+
+function makeWord(s, i) {
+  return BigInt((ordAt(s, i)) << 120n) |
+     BigInt((ordAt(s, i + 1)) << 112n) |
+     BigInt((ordAt(s, i + 2)) << 104n) |
+     BigInt((ordAt(s, i + 3)) <<  96n) |
+     BigInt((ordAt(s, i + 4)) <<  88n) |
+     BigInt((ordAt(s, i + 5)) <<  80n) |
+     BigInt((ordAt(s, i + 6)) <<  72n) |
+     BigInt((ordAt(s, i + 7)) <<  64n) |
+     BigInt((ordAt(s, i + 8)) <<  56n) |
+     BigInt((ordAt(s, i + 9)) <<  48n) |
+     BigInt((ordAt(s, i + 10)) << 40n) |
+     BigInt((ordAt(s, i + 11)) << 32n) |
+     BigInt((ordAt(s, i + 12)) << 24n) |
+     BigInt((ordAt(s, i + 13)) << 16n) |
+     BigInt((ordAt(s, i + 14)) << 8n)  |
+     BigInt(ordAt(s, i + 15));
+}
+
 
 /* Mint a creature and pay for it */
 async function mintCreature(nftId, typeId, part1, part2, 
                             part3, part4, part5,
                             expiryTimestamp, price, ownerKey,
-                            ownerPubKey, ownerAddr) {
+                            ownerPubKey, ownerAddr, uri) {
   const apiEndpoint = 'https://stacksapi-testnet.wannabe.games';
   //const apiEndpoint = 'http://localhost:3999';
   const network = new StacksTestnet( { url: apiEndpoint } );
@@ -67,6 +108,7 @@ async function mintCreature(nftId, typeId, part1, part2,
   // see `mint` in creature-racer-nft.clar
 
   // Sign minted creature arguments
+  const uriAsUintArray =  toUint128Array(uri);
   var payload = parseHexString(ownerPubKey);
   payload = payload.concat(uint128toBytes(nftId))
     .concat(uint128toBytes(typeId))
@@ -77,6 +119,9 @@ async function mintCreature(nftId, typeId, part1, part2,
     .concat(uint128toBytes(part5))
     .concat(uint128toBytes(expiryTimestamp))
     .concat(uint128toBytes(price));
+  for(var i = 0; i < uriAsUintArray.length; i++) {
+    payload = payload.concat(uint128toBytes(uriAsUintArray[i]));
+  }
 
 
   // this signature should be requested from backend
@@ -88,14 +133,14 @@ async function mintCreature(nftId, typeId, part1, part2,
     makeStandardSTXPostCondition(
       ownerAddr, FungibleConditionCode.LessEqual, 50000n),
     makeContractSTXPostCondition(
-      contractAddress, 'creature-racer-payment-v4',
+      contractAddress, 'creature-racer-payment-v5',
       FungibleConditionCode.LessEqual,
       50000n)
   ];
 
   const callArgs = {
     contractAddress: contractAddress,
-    contractName: 'creature-racer-nft-v4',
+    contractName: 'creature-racer-nft-v5',
     functionName: 'mint',
     fee: 500,
     functionArgs: [ 
@@ -105,6 +150,7 @@ async function mintCreature(nftId, typeId, part1, part2,
                                 part4, part5 ])),
       uintCV(expiryTimestamp),
       uintCV(price),
+      stringAsciiCV(uri),
       bufferCV(new Uint8Array(parseHexString(operatorSignature.data))),
       bufferCV(new Uint8Array(parseHexString(ownerPubKey)))
     ],
@@ -135,7 +181,8 @@ async function main() {
                             30000,
                             senderKey,
                             senderPubKey,
-                            senderAddr);
+                            senderAddr,
+                           'https://wannabe.games/666');
 }
 
 main().then(function (txid) {
